@@ -37,7 +37,7 @@ class GamePanel extends JPanel implements KeyListener, ActionListener, MouseList
  
   keys = new boolean[KeyEvent.KEY_LAST+1]; 
  
-  client = new YodiClient("127.0.0.1", 2600);
+  client = new YodiClient("127.0.0.1", 1100);
   
   setPreferredSize(new Dimension(800, 780));
   setFocusable(true);
@@ -60,6 +60,7 @@ class GamePanel extends JPanel implements KeyListener, ActionListener, MouseList
  
  @Override
  public void actionPerformed(ActionEvent e){
+  client.sendInfoToServer(keys);
   move(); 
   repaint(); 
 
@@ -73,8 +74,8 @@ class GamePanel extends JPanel implements KeyListener, ActionListener, MouseList
  
  @Override
  public void keyPressed(KeyEvent ke){
-  System.out.println("press");
-  client.sendInfoToServer(keys);
+  //System.out.println("press");
+  //client.sendInfoToServer(keys);
   int key = ke.getKeyCode();
   keys[key] = true;
  }
