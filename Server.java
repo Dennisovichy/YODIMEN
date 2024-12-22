@@ -25,7 +25,20 @@ public class Server extends JFrame{
 
 class ServerConnection extends JPanel
 {
-    //initialize socket and input stream
+    //private Graphics g;
+
+    //initialize sockets
+    private ServerSocket[] servers = new ServerSocket[4];
+    private Socket[] clients = new Socket[4];
+    private ConnectionWaiter[] waiters = new ConnectionWaiter[4];
+    private boolean[] connection_status = {false,false,false,false};
+
+    private ObjectInputStream[] inputs = new ObjectInputStream[4];
+    private ObjectOutputStream[] outputs = new ObjectOutputStream[4];
+    public InputPacket[] player_inputs = {null,null,null,null};
+    private Player[] player_objects = {null,null,null,null};
+    private boolean newline = false;
+
     private Socket          socket   = null;
     private ServerSocket    server   = null;
     private ObjectInputStream in       =  null;
@@ -37,15 +50,23 @@ class ServerConnection extends JPanel
     public ServerConnection(int port)
     {
         setPreferredSize(new Dimension(800, 780));
-        setFocusable(true);
+        //setFocusable(true);
         // starts server and waits for a connection
         
         try
         {
-            server = new ServerSocket(port);
+            for(int i = 0; i<4; i++){
+                servers[i] = new ServerSocket(0);
+                System.out.println(servers[i].getLocalPort());
+            }
+            //server = new ServerSocket(port);
             System.out.println("Server started");
-            waiter = new ConnectionWaiter(server);
-            waiter.start();
+            for (int i = 0; i < 4; i++) {
+                waiters[i] = new ConnectionWaiter(servers[i]);
+                waiters[i].start();
+            }
+            //waiter = new ConnectionWaiter(server);
+            //waiter.start();
 
  
             System.out.println("Waiting for a client ...");
@@ -59,23 +80,47 @@ class ServerConnection extends JPanel
         ActionListener taskPerformer = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent evt) {
-                //...Perform a task...
-                if(connected == false){
-                    socket = waiter.getSocket();
-                    if(socket != null){
-
-                        connected = true;
-                        try{
-                            in = new ObjectInputStream(socket.getInputStream());
-                        }
-                        catch(IOException e){
+                //server operations
+               for(int i = 0; i<4; i++){
+                if(connection_status[i] == false){
+                    clients[i] = waiters[i].getSocket();
+                    if(clients[i] != null){
+                        connection_status[i] = true;
+                        player_objects[i] = new Player(300, 400);
+                        try {
+                            inputs[i] = new ObjectInputStream(clients[i].getInputStream());
+                            outputs[i] = new ObjectOutputStream(clients[i].getOutputStream());
+                        } catch (IOException e) {
                             System.out.println(e);
                         }
+                    } 
+                }
+                if(connection_status[i] == true){
+                    checkInput(i);
+                }
+               }
+               //update the server state
+                for(int i = 0; i < 4; i++){
+                    if(player_objects[i] != null){
+                        player_objects[i].checkInput(player_inputs[i].keys);
+                        player_objects[i].updatePos();
                     }
                 }
-                else{
-                    checkInput();
+               //draw
+               repaint();
+
+               newline = false;
+               for(int i = 0; i<4; i++){
+                if(player_inputs[i] != null){
+                    if(player_inputs[i].keys[KeyEvent.VK_LEFT]){
+                        System.out.println(i);
+                    }
+                    //System.out.println(Arrays.toString(player_inputs[i].keys));
+                    
+                    newline = true;
                 }
+               }
+               
             }
         };
 
@@ -84,17 +129,30 @@ class ServerConnection extends JPanel
         timer.start();
     }
 
-    public void checkInput(){
+    @Override
+    public void paint(Graphics g){
+        g.setColor(new Color(255,255,255));
+        g.fillRect(0, 0, 9000, 9000);
+        for(int i = 0; i < 4; i++){
+            if(player_objects[i] != null){
+                player_objects[i].draw(g);
+            }
+        }
+    }
+
+    public void checkInput(int id){
         try {
             try{
                 boolean[] temp = {false};
-                InputPacket line = new InputPacket(temp);
-                line = (InputPacket)in.readObject();
-                System.out.println(line);
+                InputPacket line = null;
+                line = (InputPacket)inputs[id].readObject();
+                player_inputs[id] = line;
+                //System.out.println(line);
  
             }
             catch(IOException i)
             {
+                    connection_status[id] = false;
                     System.out.println("SEIU");
                     socket.close();
                     in.close(); 
@@ -104,6 +162,11 @@ class ServerConnection extends JPanel
             }
         } catch (IOException e) {
             System.out.println("Clucker");
+        }
+        catch(NullPointerException e){
+            connection_status[id] = false;
+            player_inputs[id] = null;
+            System.out.println("Client was disconnected");
         }
     }
 }
@@ -136,17 +199,4 @@ class ConnectionWaiter extends Thread{
         }
         return null;
     }
-}
-
-class InputPacket implements Serializable{
-  boolean[] keys;
-
-  public InputPacket(boolean[] inputs){
-    this.keys = inputs;
-  }
-
-  @Override
-  public String toString(){
-    return "working on the fighting side";
-  }
 }

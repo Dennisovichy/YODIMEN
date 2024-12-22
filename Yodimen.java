@@ -3,6 +3,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 import java.net.*;
+import java.util.*;
 import javax.swing.*;
 
 public class Yodimen extends JFrame{
@@ -30,14 +31,17 @@ class GamePanel extends JPanel implements KeyListener, ActionListener, MouseList
  javax.swing.Timer timer;
  Image back;
  Image frog_icon;
+
+ Scanner freeman = new Scanner(System.in);
  
  public GamePanel(){
   
   back = new ImageIcon("background.png").getImage();
  
   keys = new boolean[KeyEvent.KEY_LAST+1]; 
+  int port = freeman.nextInt();
  
-  client = new YodiClient("127.0.0.1", 1100);
+  client = new YodiClient("127.0.0.1", port);
   
   setPreferredSize(new Dimension(800, 780));
   setFocusable(true);
@@ -60,6 +64,10 @@ class GamePanel extends JPanel implements KeyListener, ActionListener, MouseList
  
  @Override
  public void actionPerformed(ActionEvent e){
+  //System.out.println(Arrays.toString(keys));
+  if(keys[KeyEvent.VK_LEFT]){
+    System.out.println(Arrays.toString(keys));
+  }
   client.sendInfoToServer(keys);
   move(); 
   repaint(); 
@@ -77,6 +85,7 @@ class GamePanel extends JPanel implements KeyListener, ActionListener, MouseList
   //System.out.println("press");
   //client.sendInfoToServer(keys);
   int key = ke.getKeyCode();
+  System.out.println("Press");
   keys[key] = true;
  }
  
@@ -167,7 +176,9 @@ class YodiClient{
     }
 
     public void sendInfoToServer(boolean[] inputs){
-      InputPacket send = new InputPacket(inputs);
+      boolean[] temp = inputs.clone();
+      InputPacket send = new InputPacket(temp);
+      //InputPacket send = new InputPacket(inputs);
       try{
         out.writeObject(send);
         
@@ -178,16 +189,5 @@ class YodiClient{
     }
 }
 
-class InputPacket implements Serializable{
-  boolean[] keys;
 
-  public InputPacket(boolean[] inputs){
-    this.keys = inputs;
-  }
-
-  @Override
-  public String toString(){
-    return "working on the fighting side";
-  }
-}
 
