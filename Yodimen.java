@@ -39,16 +39,18 @@ class GamePanel extends JPanel implements KeyListener, ActionListener, MouseList
   back = new ImageIcon("background.png").getImage();
  
   keys = new boolean[KeyEvent.KEY_LAST+1]; 
+  String address = freeman.nextLine();
   int port = freeman.nextInt();
+  System.out.println(address);
  
-  client = new YodiClient("127.0.0.1", port);
+  client = new YodiClient(address, port);
   
   setPreferredSize(new Dimension(800, 780));
   setFocusable(true);
   requestFocus();
   addKeyListener(this);
   addMouseListener(this);
-  timer = new javax.swing.Timer(20, this);
+  timer = new javax.swing.Timer(50, this);
   timer.start();
  }
 
@@ -139,6 +141,8 @@ class YodiClient{
         // establish a connection
         try {
             socket = new Socket(address, port);
+            socket.setPerformancePreferences(0, 1, 0);
+            socket.setTcpNoDelay(true);
             System.out.println("Connected");
  
             // takes input from terminal
