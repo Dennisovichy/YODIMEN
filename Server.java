@@ -57,9 +57,11 @@ class ServerConnection extends JPanel
         {
             for(int i = 0; i<4; i++){
                 servers[i] = new ServerSocket(0);
+                servers[i].setPerformancePreferences(0, 1, 0);
                 System.out.println(servers[i].getLocalPort());
             }
             //server = new ServerSocket(port);
+            System.out.println(InetAddress.getLocalHost());
             System.out.println("Server started");
             for (int i = 0; i < 4; i++) {
                 waiters[i] = new ConnectionWaiter(servers[i]);
@@ -132,7 +134,7 @@ class ServerConnection extends JPanel
     @Override
     public void paint(Graphics g){
         g.setColor(new Color(255,255,255));
-        g.fillRect(0, 0, 9000, 9000);
+        g.fillRect(0, 0, 1000, 1000);
         for(int i = 0; i < 4; i++){
             if(player_objects[i] != null){
                 player_objects[i].draw(g);
@@ -141,12 +143,21 @@ class ServerConnection extends JPanel
     }
 
     public void checkInput(int id){
-        try {
+        
             try{
                 boolean[] temp = {false};
-                InputPacket line = null;
+                InputPacket line;
                 line = (InputPacket)inputs[id].readObject();
-                player_inputs[id] = line;
+                if(player_inputs[id] != null){
+                    if(!player_inputs[id].equals(line)){
+                        player_inputs[id] = line;
+                    }
+                }
+                else{
+                    player_inputs[id] = line;
+                }
+                System.out.println(line);
+                //player_inputs[id] = line;
                 //System.out.println(line);
  
             }
@@ -154,15 +165,12 @@ class ServerConnection extends JPanel
             {
                     connection_status[id] = false;
                     System.out.println("SEIU");
-                    socket.close();
-                    in.close(); 
+                    //socket.close();
+                    //in.close(); 
             }
             catch(ClassNotFoundException e){
                 System.out.println("Fucker");
             }
-        } catch (IOException e) {
-            System.out.println("Clucker");
-        }
         catch(NullPointerException e){
             connection_status[id] = false;
             player_inputs[id] = null;

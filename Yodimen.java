@@ -39,6 +39,7 @@ class GamePanel extends JPanel implements KeyListener, ActionListener, MouseList
   back = new ImageIcon("background.png").getImage();
  
   keys = new boolean[KeyEvent.KEY_LAST+1]; 
+  //127.0.0.1 local host
   String address = freeman.nextLine();
   int port = freeman.nextInt();
   System.out.println(address);
