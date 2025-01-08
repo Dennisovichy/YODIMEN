@@ -5,6 +5,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 import java.net.*;
+import javax.sound.sampled.LineEvent;
 import javax.swing.*;
 
 public class Server extends JFrame{
@@ -126,7 +127,7 @@ class ServerConnection extends JPanel
             }
         };
 
-        timer = new javax.swing.Timer(20, taskPerformer);
+        timer = new javax.swing.Timer(10, taskPerformer);
         timer.setRepeats(true);
         timer.start();
     }
@@ -149,7 +150,7 @@ class ServerConnection extends JPanel
                 InputPacket line;
                 line = (InputPacket)inputs[id].readObject();
                 if(player_inputs[id] != null){
-                    if(!player_inputs[id].equals(line)){
+                    if(player_inputs[id].frame != line.frame){
                         player_inputs[id] = line;
                     }
                 }

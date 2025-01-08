@@ -28,6 +28,7 @@ class GamePanel extends JPanel implements KeyListener, ActionListener, MouseList
 
  YodiClient client;
  private boolean []keys;
+ long counter = 0;
  javax.swing.Timer timer;
  Image back;
  Image frog_icon;
@@ -51,7 +52,7 @@ class GamePanel extends JPanel implements KeyListener, ActionListener, MouseList
   requestFocus();
   addKeyListener(this);
   addMouseListener(this);
-  timer = new javax.swing.Timer(50, this);
+  timer = new javax.swing.Timer(10, this);
   timer.start();
  }
 
@@ -67,11 +68,12 @@ class GamePanel extends JPanel implements KeyListener, ActionListener, MouseList
  
  @Override
  public void actionPerformed(ActionEvent e){
+  counter += 1;
   //System.out.println(Arrays.toString(keys));
   if(keys[KeyEvent.VK_LEFT]){
     System.out.println(Arrays.toString(keys));
   }
-  client.sendInfoToServer(keys);
+  client.sendInfoToServer(keys, counter);
   move(); 
   repaint(); 
 
@@ -180,9 +182,9 @@ class YodiClient{
         }*/
     }
 
-    public void sendInfoToServer(boolean[] inputs){
+    public void sendInfoToServer(boolean[] inputs, long counter){
       boolean[] temp = inputs.clone();
-      InputPacket send = new InputPacket(temp);
+      InputPacket send = new InputPacket(temp, counter);
       //InputPacket send = new InputPacket(inputs);
       try{
         out.writeObject(send);
