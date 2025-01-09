@@ -40,12 +40,9 @@ class ServerConnection extends JPanel
     private Player[] player_objects = {null,null,null,null};
     private boolean newline = false;
 
-    private Socket          socket   = null;
-    private ServerSocket    server   = null;
-    private ObjectInputStream in       =  null;
-    ConnectionWaiter waiter;
-    boolean connected = false;
     javax.swing.Timer timer;
+
+    Map map = new Map();
  
     // constructor with port
     public ServerConnection(int port)
@@ -100,7 +97,7 @@ class ServerConnection extends JPanel
                 }
                 if(connection_status[i] == true){
                     checkInput(i);
-                }
+                } 
                }
                //update the server state
                 for(int i = 0; i < 4; i++){
@@ -141,6 +138,7 @@ class ServerConnection extends JPanel
                 player_objects[i].draw(g);
             }
         }
+        map.draw(g);
     }
 
     public void checkInput(int id){
