@@ -1,15 +1,15 @@
 import java.io.*;
 
 public class DisplayPacket implements Serializable{
-  boolean[] keys;
+  int player_x;
+  int player_y;
+  Map game_map;
+
 
   public DisplayPacket(boolean[] inputs){
-    this.keys = inputs;
+    
   }
 
-  public boolean keyPressed(int key){
-    return keys[key];
-  }
 
   @Override
   public String toString(){

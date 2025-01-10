@@ -5,7 +5,6 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
 import java.net.*;
-import javax.sound.sampled.LineEvent;
 import javax.swing.*;
 
 public class Server extends JFrame{
@@ -32,6 +31,7 @@ class ServerConnection extends JPanel
     private ServerSocket[] servers = new ServerSocket[4];
     private Socket[] clients = new Socket[4];
     private ConnectionWaiter[] waiters = new ConnectionWaiter[4];
+    private ConnectionChecker[] checkers = new ConnectionChecker[4];
     private boolean[] connection_status = {false,false,false,false};
 
     private ObjectInputStream[] inputs = new ObjectInputStream[4];
@@ -41,6 +41,7 @@ class ServerConnection extends JPanel
     private boolean newline = false;
 
     javax.swing.Timer timer;
+    ServerConnection ref = this;
 
     Map map = new Map();
  
@@ -93,10 +94,13 @@ class ServerConnection extends JPanel
                         } catch (IOException e) {
                             System.out.println(e);
                         }
+                        checkInput(i);
+                        checkers[i] = new ConnectionChecker(i, ref);
+                        checkers[i].start();
                     } 
                 }
                 if(connection_status[i] == true){
-                    checkInput(i);
+                    System.out.println(player_objects[i].x);
                 } 
                }
                //update the server state
@@ -148,14 +152,14 @@ class ServerConnection extends JPanel
                 InputPacket line;
                 line = (InputPacket)inputs[id].readObject();
                 if(player_inputs[id] != null){
-                    if(player_inputs[id].frame != line.frame){
+                    //if(player_inputs[id].frame != line.frame){
                         player_inputs[id] = line;
-                    }
+                    //}
                 }
                 else{
                     player_inputs[id] = line;
                 }
-                System.out.println(line);
+                //System.out.println(line);
                 //player_inputs[id] = line;
                 //System.out.println(line);
  
@@ -205,5 +209,22 @@ class ConnectionWaiter extends Thread{
             return client;
         }
         return null;
+    }
+}
+
+class ConnectionChecker extends Thread{
+    int inte;
+    ServerConnection laziness;
+
+    public ConnectionChecker(int bint, ServerConnection lazy){
+        this.inte = bint;
+        this.laziness = lazy;
+    }
+
+    @Override
+    public void run(){
+        while (true) { 
+            this.laziness.checkInput(this.inte);
+        }
     }
 }

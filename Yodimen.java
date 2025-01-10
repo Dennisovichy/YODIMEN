@@ -27,6 +27,7 @@ class GamePanel extends JPanel implements KeyListener, ActionListener, MouseList
  private int screen = INTRO;
 
  YodiClient client;
+ SpamSocket spamming;
  private boolean []keys;
  long counter = 0;
  javax.swing.Timer timer;
@@ -46,6 +47,9 @@ class GamePanel extends JPanel implements KeyListener, ActionListener, MouseList
   System.out.println(address);
  
   client = new YodiClient(address, port);
+  spamming = new SpamSocket(client, keys);
+  client.sendInfoToServer(keys, counter);
+  spamming.start();
   
   setPreferredSize(new Dimension(800, 780));
   setFocusable(true);
@@ -69,11 +73,12 @@ class GamePanel extends JPanel implements KeyListener, ActionListener, MouseList
  @Override
  public void actionPerformed(ActionEvent e){
   counter += 1;
+  spamming.counter = counter;
   //System.out.println(Arrays.toString(keys));
   if(keys[KeyEvent.VK_LEFT]){
     System.out.println(Arrays.toString(keys));
   }
-  client.sendInfoToServer(keys, counter);
+  //client.sendInfoToServer(keys, counter);
   move(); 
   repaint(); 
 
@@ -194,6 +199,24 @@ class YodiClient{
         System.out.println(e);
       }
     }
+}
+
+class SpamSocket extends Thread{
+  YodiClient ref;
+  boolean[] keys;
+  public long counter = 0;
+
+  public SpamSocket(YodiClient in, boolean[] keys){
+    this.ref = in;
+    this.keys = keys;
+  }
+
+  @Override
+  public void run(){
+    while (true) { 
+        ref.sendInfoToServer(this.keys, counter);
+    }
+  }
 }
 
 
