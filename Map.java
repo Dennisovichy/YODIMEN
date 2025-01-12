@@ -1,7 +1,8 @@
 import java.awt.*;
+import java.io.Serializable;
 import java.util.*;
 
-class Map{
+class Map implements Serializable{
   ArrayList<ArrayList<Tile>> tiles = new ArrayList<ArrayList<Tile>>();
   static int tilesize = 40;
   public Map(){
@@ -23,9 +24,20 @@ class Map{
       }
     }
   }
+
+  public void draw(Graphics g, int px, int py){
+    g.setColor(Color.YELLOW);
+    for(int y = 0; y < tiles.size(); y++){
+      for(int x = 0; x < tiles.get(0).size(); x++){
+        if(tiles.get(y).get(x) != null){
+          g.fillRect(x*tilesize + (300-px), y*tilesize + (400-py), tilesize, tilesize);
+        }
+      }
+    }
+  }
 }
 
-class Tile{
+class Tile implements Serializable{
     private int x;
     private int y;
     private int type;

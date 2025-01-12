@@ -28,6 +28,7 @@ class GamePanel extends JPanel implements KeyListener, ActionListener, MouseList
 
  YodiClient client;
  SpamSocket spamming;
+ DisplayPacket display_info = null;
  private boolean []keys;
  long counter = 0;
  javax.swing.Timer timer;
@@ -42,7 +43,7 @@ class GamePanel extends JPanel implements KeyListener, ActionListener, MouseList
  
   keys = new boolean[KeyEvent.KEY_LAST+1]; 
   //127.0.0.1 local host
-  String address = freeman.nextLine();
+  String address = "127.0.0.1";//freeman.nextLine();
   int port = freeman.nextInt();
   System.out.println(address);
  
@@ -76,10 +77,11 @@ class GamePanel extends JPanel implements KeyListener, ActionListener, MouseList
   spamming.counter = counter;
   //System.out.println(Arrays.toString(keys));
   if(keys[KeyEvent.VK_LEFT]){
-    System.out.println(Arrays.toString(keys));
+    //System.out.println(Arrays.toString(keys));
   }
   //client.sendInfoToServer(keys, counter);
   move(); 
+  display_info = client.getDisplay();
   repaint(); 
 
  }
@@ -113,7 +115,7 @@ class GamePanel extends JPanel implements KeyListener, ActionListener, MouseList
  @Override
  public void mousePressed(MouseEvent e){
   if(screen == INTRO){
-   screen = GAME;
+   //screen = GAME;
   } 
  }
 
@@ -124,7 +126,10 @@ class GamePanel extends JPanel implements KeyListener, ActionListener, MouseList
  public void paint(Graphics g){
   if(screen == INTRO){
    g.setColor(new Color(255,255,255));
-   g.fillRect(0,0,getWidth(), getHeight());     
+   g.fillRect(0,0,getWidth(), getHeight());
+   if(display_info != null){
+    display_info.game_map.draw(g, display_info.player_x, display_info.player_y);
+   }     
   }
   else if(screen == GAME){
    // The last parameter is an ImageObserver. Back when images were not loaded
@@ -140,8 +145,12 @@ class YodiClient{
   // initialize socket and input output streams
     private Socket socket = null;
     private ByteArrayOutputStream bos;
-    private DataInputStream input = null;
+    private ObjectInputStream input = null;
     private ObjectOutputStream out = null;
+
+    private boolean send_turn = true;
+
+    private DisplayPacket display = null;
  
     // constructor to put ip address and port
     public YodiClient(String address, int port)
@@ -149,16 +158,19 @@ class YodiClient{
         // establish a connection
         try {
             socket = new Socket(address, port);
+            
             socket.setPerformancePreferences(0, 1, 0);
             socket.setTcpNoDelay(true);
             System.out.println("Connected");
  
-            // takes input from terminal
-            input = new DataInputStream(System.in);
  
             // sends output to the socket
             
             out = new ObjectOutputStream(socket.getOutputStream());
+
+
+            // reads display info from server
+            input = new ObjectInputStream(socket.getInputStream());
   
         }
         catch (UnknownHostException u) {
@@ -188,16 +200,37 @@ class YodiClient{
     }
 
     public void sendInfoToServer(boolean[] inputs, long counter){
-      boolean[] temp = inputs.clone();
-      InputPacket send = new InputPacket(temp, counter);
-      //InputPacket send = new InputPacket(inputs);
-      try{
-        out.writeObject(send);
-        
+      if(send_turn){
+        //System.out.println("Ran");
+        boolean[] temp = inputs.clone();
+        InputPacket send = new InputPacket(temp, counter);
+        //InputPacket send = new InputPacket(inputs);
+        try{
+          out.writeObject(send);
+          out.flush();
+          send_turn = false;
+        }
+        catch(IOException e){
+          System.out.println(e);
+        }
       }
-      catch(IOException e){
+    }
+
+    public void readServerInfo(){
+      try {
+        display = (DisplayPacket)input.readObject();
+        if(display != null){
+          send_turn = true;
+        }
+      } 
+      catch (Exception e) {
         System.out.println(e);
+        System.out.println("SEIU");
       }
+    }
+
+    public DisplayPacket getDisplay(){
+      return display;
     }
 }
 
@@ -214,6 +247,7 @@ class SpamSocket extends Thread{
   @Override
   public void run(){
     while (true) { 
+        ref.readServerInfo();
         ref.sendInfoToServer(this.keys, counter);
     }
   }

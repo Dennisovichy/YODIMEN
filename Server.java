@@ -34,6 +34,7 @@ class ServerConnection extends JPanel
     private ConnectionChecker[] checkers = new ConnectionChecker[4];
     private boolean[] connection_status = {false,false,false,false};
 
+    private boolean[] send_turn = {true, true, true, true};
     private ObjectInputStream[] inputs = new ObjectInputStream[4];
     private ObjectOutputStream[] outputs = new ObjectOutputStream[4];
     public InputPacket[] player_inputs = {null,null,null,null};
@@ -91,23 +92,27 @@ class ServerConnection extends JPanel
                         try {
                             inputs[i] = new ObjectInputStream(clients[i].getInputStream());
                             outputs[i] = new ObjectOutputStream(clients[i].getOutputStream());
+                            outputs[i].flush();
                         } catch (IOException e) {
                             System.out.println(e);
                         }
-                        checkInput(i);
+                        //checkInput(i);
                         checkers[i] = new ConnectionChecker(i, ref);
                         checkers[i].start();
                     } 
                 }
                 if(connection_status[i] == true){
-                    System.out.println(player_objects[i].x);
+                    //System.out.println(player_objects[i].x);
+                    //player_objects[i].x += 1;
                 } 
                }
                //update the server state
                 for(int i = 0; i < 4; i++){
                     if(player_objects[i] != null){
-                        player_objects[i].checkInput(player_inputs[i].keys);
-                        player_objects[i].updatePos();
+                        if(player_inputs[i] != null){
+                            player_objects[i].checkInput(player_inputs[i].keys);
+                            player_objects[i].updatePos();
+                        }
                     }
                 }
                //draw
@@ -154,6 +159,7 @@ class ServerConnection extends JPanel
                 if(player_inputs[id] != null){
                     //if(player_inputs[id].frame != line.frame){
                         player_inputs[id] = line;
+                        send_turn[id] = true;
                     //}
                 }
                 else{
@@ -178,6 +184,22 @@ class ServerConnection extends JPanel
             connection_status[id] = false;
             player_inputs[id] = null;
             System.out.println("Client was disconnected");
+        }
+    }
+
+    public void sendClientDisplay(int id){
+        if(send_turn[id]){
+            //System.out.println("Ran");
+            DisplayPacket send = new DisplayPacket(player_objects[id].x, player_objects[id].y, map);
+
+            try {
+                outputs[id].writeObject(send);
+                outputs[id].flush();
+                send_turn[id] = false;
+            } 
+            catch(IOException e){
+                System.out.println(e);
+            }
         }
     }
 }
@@ -224,6 +246,7 @@ class ConnectionChecker extends Thread{
     @Override
     public void run(){
         while (true) { 
+            this.laziness.sendClientDisplay(this.inte);
             this.laziness.checkInput(this.inte);
         }
     }

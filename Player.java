@@ -14,7 +14,7 @@ class BaseEntity{
 
 public class Player{
     public int x;
-    private int y;
+    public int y;
 
     private int movement_x = 0;
     private int movement_y = 0;

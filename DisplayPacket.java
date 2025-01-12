@@ -6,8 +6,10 @@ public class DisplayPacket implements Serializable{
   Map game_map;
 
 
-  public DisplayPacket(boolean[] inputs){
-    
+  public DisplayPacket(int playerx, int playery, Map gamemap){
+    this.player_x = playerx;
+    this.player_y = playery;
+    this.game_map = gamemap;
   }
 
 
