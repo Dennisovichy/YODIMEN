@@ -1,5 +1,6 @@
 import java.awt.*;
 import java.awt.event.*;
+import java.io.Serializable;
 
 class BaseEntity{
     private int x;
@@ -12,7 +13,7 @@ class BaseEntity{
     }
 }
 
-public class Player{
+public class Player implements Serializable, Cloneable{
     public int x;
     public int y;
 
@@ -30,6 +31,12 @@ public class Player{
     public Player(int x, int y){
         this.x = x;
         this.y = y;
+    }
+
+    @Override
+    public Object clone() throws CloneNotSupportedException{
+        Player temp = (Player)super.clone();
+        return temp;
     }
 
     public Rectangle getHitbox(){
@@ -71,6 +78,19 @@ public class Player{
         Rectangle[] drawthese = getCollideBoxes();
         for(Rectangle draw : drawthese){
             g2.drawRect(draw.x, draw.y, draw.width, draw.height);
+        }
+    }
+
+    public void draw(Graphics g, int px, int py){
+        Graphics2D g2 = (Graphics2D)g;
+        g2.setColor(Color.BLACK);
+        //g2.fillRect(x - (width/2) + (300 - px), y - (height/2) + (400 - py), width, height);
+        g2.fillRect(300 - (x - px) - (width/2),400 - (y - py) - (height/2), width, height);
+        //System.out.println(x);
+        g2.setColor(Color.RED);
+        Rectangle[] drawthese = getCollideBoxes();
+        for(Rectangle draw : drawthese){
+            g2.drawRect(draw.x + (300 - px), draw.y + (400 - py), draw.width, draw.height);
         }
     }
 }

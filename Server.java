@@ -45,11 +45,13 @@ class ServerConnection extends JPanel
     ServerConnection ref = this;
 
     Map map = new Map();
+    public static final int screenwidth = 800;
+    public static final int screenheight = 780;
  
     // constructor with port
     public ServerConnection(int port)
     {
-        setPreferredSize(new Dimension(800, 780));
+        setPreferredSize(new Dimension(screenwidth, screenheight));
         //setFocusable(true);
         // starts server and waits for a connection
         
@@ -112,6 +114,7 @@ class ServerConnection extends JPanel
                         if(player_inputs[i] != null){
                             player_objects[i].checkInput(player_inputs[i].keys);
                             player_objects[i].updatePos();
+                            System.out.println(player_objects[i].x);
                         }
                     }
                 }
@@ -190,7 +193,20 @@ class ServerConnection extends JPanel
     public void sendClientDisplay(int id){
         if(send_turn[id]){
             //System.out.println("Ran");
-            DisplayPacket send = new DisplayPacket(player_objects[id].x, player_objects[id].y, map);
+            Player[] sendy = {null, null, null, null};
+            for(int i = 0; i < 4; i++){
+                if(player_objects[i] != null){
+                try{
+                sendy[i] = (Player)player_objects[i].clone();
+                }
+                catch(Exception e){
+
+                }
+                }
+            }
+            //sendy = player_objects.clone();
+            //System.out.println(sendy[id].x);
+            DisplayPacket send = new DisplayPacket(player_objects[id].x, player_objects[id].y, map, sendy);
 
             try {
                 outputs[id].writeObject(send);

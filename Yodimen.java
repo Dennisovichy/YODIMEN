@@ -97,7 +97,7 @@ class GamePanel extends JPanel implements KeyListener, ActionListener, MouseList
   //System.out.println("press");
   //client.sendInfoToServer(keys);
   int key = ke.getKeyCode();
-  System.out.println("Press");
+  //System.out.println("Press");
   keys[key] = true;
  }
  
@@ -129,6 +129,14 @@ class GamePanel extends JPanel implements KeyListener, ActionListener, MouseList
    g.fillRect(0,0,getWidth(), getHeight());
    if(display_info != null){
     display_info.game_map.draw(g, display_info.player_x, display_info.player_y);
+    int count = 0;
+    for(Player play: display_info.players){
+      if(play != null){
+        count += 1;
+        play.draw(g, display_info.player_x, display_info.player_y);
+      }
+    }
+    //System.out.println(count);
    }     
   }
   else if(screen == GAME){
