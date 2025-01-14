@@ -206,12 +206,18 @@ class ServerConnection extends JPanel
             }
             //sendy = player_objects.clone();
             //System.out.println(sendy[id].x);
-            DisplayPacket send = new DisplayPacket(player_objects[id].x, player_objects[id].y, map, sendy);
+            DisplayPacket send = null;
+            try{
+            send = new DisplayPacket(player_objects[id].x, player_objects[id].y, (Map)map.clone(), sendy);
+            }
+            catch(Exception e){
+
+            }
 
             try {
                 outputs[id].writeObject(send);
                 outputs[id].flush();
-                send_turn[id] = false;
+                //send_turn[id] = false;
             } 
             catch(IOException e){
                 System.out.println(e);

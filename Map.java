@@ -2,15 +2,27 @@ import java.awt.*;
 import java.io.Serializable;
 import java.util.*;
 
-class Map implements Serializable{
+class Map implements Serializable, Cloneable{
   ArrayList<ArrayList<Tile>> tiles = new ArrayList<ArrayList<Tile>>();
   static int tilesize = 40;
   public Map(){
     ArrayList<Tile> row = new ArrayList<Tile>();
-    for(int i = 0; i < 10; i++){
+    for(int i = 0; i < 30; i++){
       row.add(new Rock());
     }
     tiles.add(row);
+    for(int x = 0; x < 14; x++){
+      ArrayList<Tile> row2 = new ArrayList<Tile>();
+      for(int i = 0; i < 30; i++){
+        row2.add(null);
+      }
+      tiles.add(row2);
+    }
+    ArrayList<Tile> row4 = new ArrayList<Tile>();
+    for(int i = 0; i < 30; i++){
+      row4.add(new Rock());
+    }
+    tiles.add(row4);
     
     
   }
@@ -35,6 +47,12 @@ class Map implements Serializable{
       }
     }
   }
+
+  @Override
+    public Object clone() throws CloneNotSupportedException{
+        Map temp = (Map)super.clone();
+        return temp;
+    }
 }
 
 class Tile implements Serializable{

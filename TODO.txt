@@ -1,0 +1,4 @@
+-Need to make the whole game now
+1. Map and player collisions with it
+2. Sort the players onto teams
+3. Guns for them to shoot each other

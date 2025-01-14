@@ -1,6 +1,7 @@
 import java.awt.*;
 import java.awt.event.*;
 import java.io.Serializable;
+import java.util.*;
 
 class BaseEntity{
     private int x;
@@ -26,6 +27,10 @@ public class Player implements Serializable, Cloneable{
     private int collidebox_depth = 20;
     private int collidebox_outset = 10;
 
+    private boolean colliding_up = false;
+    private boolean colliding_down = false;
+    private boolean colliding_left = false;
+    private boolean colliding_right = false;
     private Rectangle hitbox;
     private boolean[] collision = {true, true}; //collides with either team?
     public Player(int x, int y){
@@ -66,6 +71,39 @@ public class Player implements Serializable, Cloneable{
         }
     }
 
+    public void checkMapCollision(Map map){
+        colliding_down = false;
+        colliding_left = false;
+        colliding_right = false;
+        colliding_up = false;
+
+        Rectangle[] rects = getCollideBoxes();
+        for(ArrayList<Tile> tilelist: map.tiles){
+            for(Tile tile : tilelist){
+                if(!colliding_left){
+                    if(tile.getHitbox().intersects(rects[0])){
+                        colliding_left = true;
+                    }
+                }
+                if(!colliding_right){
+                    if(tile.getHitbox().intersects(rects[1])){
+                        colliding_right = true;
+                    }
+                }
+                if(!colliding_up){
+                    if(tile.getHitbox().intersects(rects[2])){
+                        colliding_up = true;
+                    }
+                }
+                if(!colliding_down){
+                    if(tile.getHitbox().intersects(rects[3])){
+                        colliding_down = true;
+                    }
+                }
+            }
+        }
+    }
+
     public void updatePos(){
         x = x + movement_x;
     }
@@ -84,8 +122,11 @@ public class Player implements Serializable, Cloneable{
     public void draw(Graphics g, int px, int py){
         Graphics2D g2 = (Graphics2D)g;
         g2.setColor(Color.BLACK);
-        //g2.fillRect(x - (width/2) + (300 - px), y - (height/2) + (400 - py), width, height);
-        g2.fillRect(300 - (x - px) - (width/2),400 - (y - py) - (height/2), width, height);
+        g2.fillRect(x - (width/2) + (300 - px), y - (height/2) + (400 - py), width, height);
+        if(px == x && py == y){
+
+        }
+        //g2.fillRect(300 - (x - px) - (width/2),400 - (y - py) - (height/2), width, height);
         //System.out.println(x);
         g2.setColor(Color.RED);
         Rectangle[] drawthese = getCollideBoxes();

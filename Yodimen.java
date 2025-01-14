@@ -216,7 +216,7 @@ class YodiClient{
         try{
           out.writeObject(send);
           out.flush();
-          send_turn = false;
+          //send_turn = false;
         }
         catch(IOException e){
           System.out.println(e);
