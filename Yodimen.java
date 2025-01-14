@@ -25,6 +25,7 @@ public class Yodimen extends JFrame{
 class GamePanel extends JPanel implements KeyListener, ActionListener, MouseListener{
  public static final int INTRO=0, GAME=1, END=2;
  private int screen = INTRO;
+ Menu menu = new Menu();
 
  YodiClient client;
  SpamSocket spamming;
@@ -46,14 +47,6 @@ class GamePanel extends JPanel implements KeyListener, ActionListener, MouseList
  
   keys = new boolean[KeyEvent.KEY_LAST+1]; 
   //127.0.0.1 local host
-  String address = "127.0.0.1";//freeman.nextLine();
-  int port = freeman.nextInt();
-  System.out.println(address);
- 
-  client = new YodiClient(address, port);
-  spamming = new SpamSocket(client, keys);
-  client.sendInfoToServer(keys, counter);
-  spamming.start();
   
   setPreferredSize(new Dimension(800, 780));
   setFocusable(true);
@@ -77,7 +70,6 @@ class GamePanel extends JPanel implements KeyListener, ActionListener, MouseList
  @Override
  public void actionPerformed(ActionEvent e){
   counter += 1;
-  spamming.counter = counter;
   
   Point mouse = MouseInfo.getPointerInfo().getLocation();
   Point offset = getLocationOnScreen();
@@ -91,7 +83,9 @@ class GamePanel extends JPanel implements KeyListener, ActionListener, MouseList
   }
   //client.sendInfoToServer(keys, counter);
   move(); 
-  display_info = client.getDisplay();
+  if(screen == GAME){
+    display_info = client.getDisplay();
+  }
   repaint(); 
 
  }
@@ -125,7 +119,20 @@ class GamePanel extends JPanel implements KeyListener, ActionListener, MouseList
  @Override
  public void mousePressed(MouseEvent e){
   if(screen == INTRO){
-   //screen = GAME;
+    Point mouse = MouseInfo.getPointerInfo().getLocation();
+   Point offset = getLocationOnScreen();
+   mousex = mouse.x - offset.x;
+   mousey = mouse.y - offset.y;
+   menu.checkScreen(mousex, mousey);
+   if(menu.current_screen.game){
+    String address = "127.0.0.1";//JOptionPane.showInputDialog("Enter server address");
+    int port = Integer.parseInt(JOptionPane.showInputDialog("Enter port number"));
+    client = new YodiClient(address, port);
+    spamming = new SpamSocket(client, keys);
+    client.sendInfoToServer(keys, counter);
+    spamming.start();
+    screen = GAME;
+   }
   } 
  }
 
@@ -135,7 +142,12 @@ class GamePanel extends JPanel implements KeyListener, ActionListener, MouseList
  @Override
  public void paint(Graphics g){
   if(screen == INTRO){
-   g.setColor(new Color(255,255,255));
+     g.setColor(Color.WHITE);
+     g.fillRect(0,0, 1500, 1500);
+     menu.drawScreen(g);
+  }
+  else if(screen == GAME){
+    g.setColor(new Color(255,255,255));
    g.fillRect(0,0,getWidth(), getHeight());
    if(display_info != null){
     display_info.game_map.draw(g, display_info.player_x, display_info.player_y);
@@ -147,13 +159,7 @@ class GamePanel extends JPanel implements KeyListener, ActionListener, MouseList
       }
     }
     //System.out.println(count);
-   }     
-  }
-  else if(screen == GAME){
-   // The last parameter is an ImageObserver. Back when images were not loaded
-   // right away you would specify what object would be notified when it was loaded.
-   // We are not doing that, so null will always be fine.
-   
+   }  
   }
     }
 }

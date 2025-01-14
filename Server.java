@@ -33,6 +33,7 @@ class ServerConnection extends JPanel
     private ConnectionWaiter[] waiters = new ConnectionWaiter[4];
     private ConnectionChecker[] checkers = new ConnectionChecker[4];
     private boolean[] connection_status = {false,false,false,false};
+    private boolean[] made_teamDecision = {false, false, false,false};
 
     private boolean[] send_turn = {true, true, true, true};
     private ObjectInputStream[] inputs = new ObjectInputStream[4];
@@ -90,7 +91,7 @@ class ServerConnection extends JPanel
                     clients[i] = waiters[i].getSocket();
                     if(clients[i] != null){
                         connection_status[i] = true;
-                        player_objects[i] = new Player(300, 400);
+                        player_objects[i] = new Player(300, 400, true);
                         try {
                             inputs[i] = new ObjectInputStream(clients[i].getInputStream());
                             outputs[i] = new ObjectOutputStream(clients[i].getOutputStream());

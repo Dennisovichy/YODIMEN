@@ -18,6 +18,7 @@ public class Player implements Serializable, Cloneable{
     public int x;
     public int y;
 
+
     private int movement_x = 0;
     private int movement_y = 0;
 
@@ -27,15 +28,18 @@ public class Player implements Serializable, Cloneable{
     private int collidebox_depth = 20;
     private int collidebox_outset = 10;
 
+    public boolean red_team;
+
     private boolean colliding_up = false;
     private boolean colliding_down = false;
     private boolean colliding_left = false;
     private boolean colliding_right = false;
     private Rectangle hitbox;
     private boolean[] collision = {true, true}; //collides with either team?
-    public Player(int x, int y){
+    public Player(int x, int y, boolean redteam){
         this.x = x;
         this.y = y;
+        this.red_team = redteam;
     }
 
     @Override
@@ -146,9 +150,14 @@ public class Player implements Serializable, Cloneable{
 
     public void draw(Graphics g){
         Graphics2D g2 = (Graphics2D)g;
-        g2.setColor(Color.BLACK);
+        if(red_team){
+            g2.setColor(Color.RED);
+        }
+        else{
+            g2.setColor(Color.BLUE);
+        }
         g2.fillRect(x - (width/2), y - (height/2), width, height);
-        g2.setColor(Color.RED);
+        g2.setColor(Color.BLACK);
         Rectangle[] drawthese = getCollideBoxes();
         for(Rectangle draw : drawthese){
             g2.drawRect(draw.x, draw.y, draw.width, draw.height);
@@ -157,14 +166,16 @@ public class Player implements Serializable, Cloneable{
 
     public void draw(Graphics g, int px, int py){
         Graphics2D g2 = (Graphics2D)g;
-        g2.setColor(Color.BLACK);
-        g2.fillRect(x - (width/2) + (300 - px), y - (height/2) + (400 - py), width, height);
-        if(px == x && py == y){
-
+        if(red_team){
+            g2.setColor(Color.RED);
         }
+        else{
+            g2.setColor(Color.BLUE);
+        }
+        g2.fillRect(x - (width/2) + (300 - px), y - (height/2) + (400 - py), width, height);
         //g2.fillRect(300 - (x - px) - (width/2),400 - (y - py) - (height/2), width, height);
         //System.out.println(x);
-        g2.setColor(Color.RED);
+        g2.setColor(Color.BLACK);
         Rectangle[] drawthese = getCollideBoxes();
         for(Rectangle draw : drawthese){
             g2.drawRect(draw.x + (300 - px), draw.y + (400 - py), draw.width, draw.height);
