@@ -113,8 +113,9 @@ class ServerConnection extends JPanel
                     if(player_objects[i] != null){
                         if(player_inputs[i] != null){
                             player_objects[i].checkInput(player_inputs[i].keys);
+                            player_objects[i].checkMapCollision(map);
                             player_objects[i].updatePos();
-                            System.out.println(player_objects[i].x);
+                            //System.out.println(player_objects[i].x);
                         }
                     }
                 }

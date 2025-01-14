@@ -69,6 +69,11 @@ public class Player implements Serializable, Cloneable{
         if(keys[KeyEvent.VK_D]){
             movement_x = 5;
         }
+        if(keys[KeyEvent.VK_W]){
+            if(colliding_down){
+                movement_y = -20;
+            }
+        }
     }
 
     public void checkMapCollision(Map map){
@@ -80,32 +85,63 @@ public class Player implements Serializable, Cloneable{
         Rectangle[] rects = getCollideBoxes();
         for(ArrayList<Tile> tilelist: map.tiles){
             for(Tile tile : tilelist){
+                if(tile != null){
                 if(!colliding_left){
                     if(tile.getHitbox().intersects(rects[0])){
                         colliding_left = true;
+                        //System.out.println("Left collide");
                     }
                 }
                 if(!colliding_right){
                     if(tile.getHitbox().intersects(rects[1])){
                         colliding_right = true;
+                        //System.out.println("right collide");
                     }
                 }
                 if(!colliding_up){
                     if(tile.getHitbox().intersects(rects[2])){
                         colliding_up = true;
+                        //System.out.println("up collide");
                     }
                 }
                 if(!colliding_down){
                     if(tile.getHitbox().intersects(rects[3])){
                         colliding_down = true;
+                        //System.out.println("down collide");
                     }
+                }
                 }
             }
         }
     }
 
     public void updatePos(){
-        x = x + movement_x;
+        if(!colliding_down){
+            if(movement_y < 10){
+                movement_y += 1;
+            }
+        }
+        //trying to move left
+        if(movement_x < 0){
+            if(!colliding_left){
+                x = x + movement_x;
+            }
+        }
+        if(movement_x > 0){
+            if(!colliding_right){
+                x = x + movement_x;
+            }
+        }
+        if(movement_y < 0){
+            if(!colliding_up){
+                y = y + movement_y;
+            }
+        }
+        if(movement_y > 0){
+            if(!colliding_down){
+                y = y + movement_y;
+            }
+        }
     }
 
     public void draw(Graphics g){

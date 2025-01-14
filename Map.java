@@ -8,10 +8,10 @@ class Map implements Serializable, Cloneable{
   public Map(){
     ArrayList<Tile> row = new ArrayList<Tile>();
     for(int i = 0; i < 30; i++){
-      row.add(new Rock());
+      row.add(new Rock(i*tilesize, 0));
     }
     tiles.add(row);
-    for(int x = 0; x < 14; x++){
+    for(int x = 0; x < 11; x++){
       ArrayList<Tile> row2 = new ArrayList<Tile>();
       for(int i = 0; i < 30; i++){
         row2.add(null);
@@ -20,18 +20,21 @@ class Map implements Serializable, Cloneable{
     }
     ArrayList<Tile> row4 = new ArrayList<Tile>();
     for(int i = 0; i < 30; i++){
-      row4.add(new Rock());
+      row4.add(new Rock(i*tilesize, 12*tilesize));
     }
     tiles.add(row4);
     
     
   }
   public void draw(Graphics g){
-    g.setColor(Color.YELLOW);
     for(int y = 0; y < tiles.size(); y++){
       for(int x = 0; x < tiles.get(0).size(); x++){
         if(tiles.get(y).get(x) != null){
+          g.setColor(Color.YELLOW);
           g.fillRect(x*tilesize, y*tilesize, tilesize, tilesize);
+          g.setColor(Color.BLACK);
+          Rectangle balls = tiles.get(y).get(x).getHitbox();
+          g.drawRect(balls.x, balls.y, balls.width, balls.height);
         }
       }
     }
@@ -63,20 +66,21 @@ class Tile implements Serializable{
     private boolean[] collision = {true, true};
     private Rectangle hitbox;
     
-    public Tile(){
-      
+    public Tile(int x, int y){
+      this.x = x;
+      this.y = y;
     }
 
     public Rectangle getHitbox(){
-      return new Rectangle(x-Map.tilesize/2, y-Map.tilesize/2, Map.tilesize, Map.tilesize);
+      return new Rectangle(x, y, Map.tilesize, Map.tilesize);
     }
 }
 
 class Rock extends Tile{
     
   
-    public Rock(){
-      
+    public Rock(int x, int y){
+      super(x, y);
     
     }
 }

@@ -35,6 +35,9 @@ class GamePanel extends JPanel implements KeyListener, ActionListener, MouseList
  Image back;
  Image frog_icon;
 
+ int mousex;
+ int mousey;
+
  Scanner freeman = new Scanner(System.in);
  
  public GamePanel(){
@@ -75,6 +78,13 @@ class GamePanel extends JPanel implements KeyListener, ActionListener, MouseList
  public void actionPerformed(ActionEvent e){
   counter += 1;
   spamming.counter = counter;
+  
+  Point mouse = MouseInfo.getPointerInfo().getLocation();
+  Point offset = getLocationOnScreen();
+  mousex = mouse.x - offset.x;
+  mousey = mouse.y - offset.y;
+  //System.out.println(mousex + ", " + mousey);
+
   //System.out.println(Arrays.toString(keys));
   if(keys[KeyEvent.VK_LEFT]){
     //System.out.println(Arrays.toString(keys));
