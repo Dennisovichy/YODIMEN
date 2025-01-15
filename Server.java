@@ -91,7 +91,7 @@ class ServerConnection extends JPanel
                     clients[i] = waiters[i].getSocket();
                     if(clients[i] != null){
                         connection_status[i] = true;
-                        player_objects[i] = new Player(300, 400, true);
+                        //player_objects[i] = new Player(300, 400, true);
                         try {
                             inputs[i] = new ObjectInputStream(clients[i].getInputStream());
                             outputs[i] = new ObjectOutputStream(clients[i].getOutputStream());
@@ -113,7 +113,9 @@ class ServerConnection extends JPanel
                 for(int i = 0; i < 4; i++){
                     if(player_objects[i] != null){
                         if(player_inputs[i] != null){
-                            player_objects[i].checkInput(player_inputs[i].keys);
+                            if(player_inputs[i].keys != null){
+                                player_objects[i].checkInput(player_inputs[i].keys);
+                            }
                             player_objects[i].checkMapCollision(map);
                             player_objects[i].updatePos();
                             //System.out.println(player_objects[i].x);
@@ -124,16 +126,6 @@ class ServerConnection extends JPanel
                repaint();
 
                newline = false;
-               for(int i = 0; i<4; i++){
-                if(player_inputs[i] != null){
-                    if(player_inputs[i].keys[KeyEvent.VK_LEFT]){
-                        System.out.println(i);
-                    }
-                    //System.out.println(Arrays.toString(player_inputs[i].keys));
-                    
-                    newline = true;
-                }
-               }
                
             }
         };
@@ -162,10 +154,15 @@ class ServerConnection extends JPanel
                 InputPacket line;
                 line = (InputPacket)inputs[id].readObject();
                 if(player_inputs[id] != null){
-                    //if(player_inputs[id].frame != line.frame){
+                    if(player_objects[id] == null){
+                        System.out.println(line.decision_made);
+                        if(line.decision_made == true){
+                            player_objects[id] = new Player(300, 400, line.red_team);
+                        }
+                    }
                         player_inputs[id] = line;
                         send_turn[id] = true;
-                    //}
+                    
                 }
                 else{
                     player_inputs[id] = line;
@@ -210,7 +207,12 @@ class ServerConnection extends JPanel
             //System.out.println(sendy[id].x);
             DisplayPacket send = null;
             try{
-            send = new DisplayPacket(player_objects[id].x, player_objects[id].y, (Map)map.clone(), sendy);
+                if(player_objects[id] != null){
+                    send = new DisplayPacket(player_objects[id].x, player_objects[id].y, (Map)map.clone(), sendy);
+                }
+                else{
+                    send = new DisplayPacket(map.default_camx, map.default_camy, (Map)map.clone(), sendy);
+                }
             }
             catch(Exception e){
 

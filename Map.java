@@ -5,6 +5,10 @@ import java.util.*;
 class Map implements Serializable, Cloneable{
   ArrayList<ArrayList<Tile>> tiles = new ArrayList<ArrayList<Tile>>();
   static int tilesize = 40;
+  
+  int default_camx = 300;
+  int default_camy = 400;
+  
   public Map(){
     ArrayList<Tile> row = new ArrayList<Tile>();
     for(int i = 0; i < 30; i++){

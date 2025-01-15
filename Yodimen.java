@@ -23,7 +23,7 @@ public class Yodimen extends JFrame{
 }
 
 class GamePanel extends JPanel implements KeyListener, ActionListener, MouseListener{
- public static final int INTRO=0, GAME=1, END=2;
+ public static final int INTRO=0, GAME=1, CHOOSE=2;
  private int screen = INTRO;
  Menu menu = new Menu();
 
@@ -130,8 +130,9 @@ class GamePanel extends JPanel implements KeyListener, ActionListener, MouseList
     client = new YodiClient(address, port);
     spamming = new SpamSocket(client, keys);
     client.sendInfoToServer(keys, counter);
+    client.sendInfoToServer(true, false);
     spamming.start();
-    screen = GAME;
+    screen = CHOOSE;
    }
   } 
  }
@@ -240,6 +241,23 @@ class YodiClient{
       }
     }
 
+    public void sendInfoToServer(boolean temp, boolean counter){
+      if(send_turn){
+        //System.out.println("Ran");
+        boolean wbgat = temp;
+        InputPacket send = new InputPacket(wbgat, counter);
+        //InputPacket send = new InputPacket(inputs);
+        try{
+          out.writeObject(send);
+          out.flush();
+          //send_turn = false;
+        }
+        catch(IOException e){
+          System.out.println(e);
+        }
+      }
+    }
+
     public void readServerInfo(){
       try {
         display = (DisplayPacket)input.readObject();
@@ -273,6 +291,7 @@ class SpamSocket extends Thread{
     while (true) { 
         ref.readServerInfo();
         ref.sendInfoToServer(this.keys, counter);
+        //ref.sendInfoToServer(true, false);
     }
   }
 }

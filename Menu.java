@@ -5,14 +5,22 @@ import javax.swing.*;
 public class Menu{
     Screen current_screen;
     Screen title_screen = new Screen(false);
-    Screen game_trigger = new Screen(true);
+    Screen choose_team = new Screen(true);
+    Screen blue_team = new Screen(true);
+    Screen red_team = new Screen(true);
 
     JTextField field = new JTextField(5);
 
     public Menu(){
         Button play = new Button(20, 20, 100, 100, "pound");
-        play.leadToScreen(game_trigger);
+        Button red = new Button(20, 20, 100, 100, "RED");
+        Button blue = new Button(120, 20, 100, 100, "BLUE");
+        play.leadToScreen(choose_team);
+        red.leadToScreen(red_team);
+        blue.leadToScreen(blue_team);
         title_screen.addButton(play);
+        choose_team.addButton(blue);
+        choose_team.addButton(red);
         current_screen = title_screen;
     }
 
