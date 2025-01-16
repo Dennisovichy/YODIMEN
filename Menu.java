@@ -1,15 +1,14 @@
 import java.awt.*;
 import java.util.*;
-import javax.swing.*;
 
 public class Menu{
     Screen current_screen;
+    Screen previous_screen;
     Screen title_screen = new Screen(false);
     Screen choose_team = new Screen(true);
-    Screen blue_team = new Screen(true);
-    Screen red_team = new Screen(true);
+    Screen blue_team = new Screen(false);
+    Screen red_team = new Screen(false);
 
-    JTextField field = new JTextField(5);
 
     public Menu(){
         Button play = new Button(20, 20, 100, 100, "pound");
@@ -22,13 +21,21 @@ public class Menu{
         choose_team.addButton(blue);
         choose_team.addButton(red);
         current_screen = title_screen;
+        
     }
 
     public void checkScreen(int mx, int my){
         Screen temp = current_screen.pressButton(mx, my);
         if(temp != null){
+            previous_screen = current_screen;
             current_screen = temp;
         }
+    }
+
+    public void goBackScreen(){
+        Screen temp = current_screen;
+        current_screen = previous_screen;
+        previous_screen = temp;
     }
 
     public void drawScreen(Graphics g){

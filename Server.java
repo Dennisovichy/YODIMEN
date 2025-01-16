@@ -153,7 +153,7 @@ class ServerConnection extends JPanel
                 boolean[] temp = {false};
                 InputPacket line;
                 line = (InputPacket)inputs[id].readObject();
-                if(player_inputs[id] != null){
+                
                     if(player_objects[id] == null){
                         System.out.println(line.decision_made);
                         if(line.decision_made == true){
@@ -163,10 +163,8 @@ class ServerConnection extends JPanel
                         player_inputs[id] = line;
                         send_turn[id] = true;
                     
-                }
-                else{
-                    player_inputs[id] = line;
-                }
+                
+                
                 //System.out.println(line);
                 //player_inputs[id] = line;
                 //System.out.println(line);

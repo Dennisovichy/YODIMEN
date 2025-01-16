@@ -83,7 +83,8 @@ class GamePanel extends JPanel implements KeyListener, ActionListener, MouseList
   }
   //client.sendInfoToServer(keys, counter);
   move(); 
-  if(screen == GAME){
+
+  if(screen == GAME || screen == CHOOSE){
     display_info = client.getDisplay();
   }
   repaint(); 
@@ -119,20 +120,34 @@ class GamePanel extends JPanel implements KeyListener, ActionListener, MouseList
  @Override
  public void mousePressed(MouseEvent e){
   if(screen == INTRO){
-    Point mouse = MouseInfo.getPointerInfo().getLocation();
-   Point offset = getLocationOnScreen();
-   mousex = mouse.x - offset.x;
-   mousey = mouse.y - offset.y;
    menu.checkScreen(mousex, mousey);
    if(menu.current_screen.game){
     String address = "127.0.0.1";//JOptionPane.showInputDialog("Enter server address");
     int port = Integer.parseInt(JOptionPane.showInputDialog("Enter port number"));
-    client = new YodiClient(address, port);
-    spamming = new SpamSocket(client, keys);
-    client.sendInfoToServer(keys, counter);
+    try {
+        Socket test = new Socket(address, port);
+        client = new YodiClient(test);
+        spamming = new SpamSocket(client, keys);
+        client.sendInfoToServer(keys, counter);
+        //client.sendInfoToServer(true, false);
+        spamming.start();
+        screen = CHOOSE;
+    } catch (Exception er) {
+      System.out.println("caught");
+      menu.goBackScreen();
+    }
+    
+   }
+  }
+  if(screen == CHOOSE){
+    menu.checkScreen(mousex, mousey);
+   if(menu.current_screen == menu.red_team){
+    client.sendInfoToServer(true, true);
+    screen = GAME;
+   }
+   if(menu.current_screen == menu.blue_team){
     client.sendInfoToServer(true, false);
-    spamming.start();
-    screen = CHOOSE;
+    screen = GAME;
    }
   } 
  }
@@ -142,7 +157,7 @@ class GamePanel extends JPanel implements KeyListener, ActionListener, MouseList
 
  @Override
  public void paint(Graphics g){
-  if(screen == INTRO){
+  if(screen == INTRO || screen == CHOOSE){
      g.setColor(Color.WHITE);
      g.fillRect(0,0, 1500, 1500);
      menu.drawScreen(g);
@@ -206,22 +221,38 @@ class YodiClient{
             System.out.println(i);
             return;
         }
-      
  
-        
-                //out.writeUTF(line);
-           
-        
+    }
+
+    public YodiClient(Socket sock)
+    {
+        // establish a connection
+        try {
+            socket = sock;
+            
+            socket.setPerformancePreferences(0, 1, 0);
+            socket.setTcpNoDelay(true);
+            System.out.println("Connected");
  
-        // close the connection
-        /*try {
-            input.close();
-            out.close();
-            socket.close();
+ 
+            // sends output to the socket
+            
+            out = new ObjectOutputStream(socket.getOutputStream());
+
+
+            // reads display info from server
+            input = new ObjectInputStream(socket.getInputStream());
+  
+        }
+        catch (UnknownHostException u) {
+            System.out.println(u);
+            return;
         }
         catch (IOException i) {
             System.out.println(i);
-        }*/
+            return;
+        }
+ 
     }
 
     public void sendInfoToServer(boolean[] inputs, long counter){
