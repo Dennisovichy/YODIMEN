@@ -77,6 +77,7 @@ class GamePanel extends JPanel implements KeyListener, ActionListener, MouseList
   counter += 1;
   Point offset = new Point(0,0);
   Point mouse = MouseInfo.getPointerInfo().getLocation();
+  offset = getLocationOnScreen();
   try{
     offset = getLocationOnScreen();
   }
@@ -145,7 +146,7 @@ class GamePanel extends JPanel implements KeyListener, ActionListener, MouseList
         spamming = new SpamSocket(client, keys, this);
         client.sendInfoToServer(keys, counter, mousex_offset, mousey_offset, mouse_pressed);
         //client.sendInfoToServer(true, false);
-        spamming.start();
+        //spamming.start();
         screen = CHOOSE;
     } catch (Exception er) {
       System.out.println("caught");
@@ -158,10 +159,12 @@ class GamePanel extends JPanel implements KeyListener, ActionListener, MouseList
     menu.checkScreen(mousex, mousey);
    if(menu.current_screen == menu.red_team){
     client.sendInfoToServer(true, true);
+    spamming.start();
     screen = GAME;
    }
    if(menu.current_screen == menu.blue_team){
     client.sendInfoToServer(true, false);
+    spamming.start();
     screen = GAME;
    }
   } 
@@ -210,7 +213,7 @@ class YodiClient{
     private ObjectInputStream input = null;
     private ObjectOutputStream out = null;
 
-    private boolean send_turn = false;
+    private boolean send_turn = true;
 
     private DisplayPacket display = null;
  
