@@ -33,6 +33,9 @@ class GameP extends JPanel implements KeyListener, ActionListener, MouseListener
  int mousex;
  int mousey;
 
+ int camx = 0;
+ int camy = 0;
+
  Scanner freeman = new Scanner(System.in);
  
  public GameP(){
@@ -61,6 +64,17 @@ class GameP extends JPanel implements KeyListener, ActionListener, MouseListener
  
  @Override
  public void actionPerformed(ActionEvent e){
+  Point offset = new Point(0,0);
+  Point mouse = MouseInfo.getPointerInfo().getLocation();
+  offset = getLocationOnScreen();
+  try{
+    offset = getLocationOnScreen();
+  }
+  catch(IllegalComponentStateException err){
+    
+  }
+  mousex = mouse.x - offset.x;
+  mousey = mouse.y - offset.y;
   move();
   repaint();
 
@@ -94,18 +108,7 @@ class GameP extends JPanel implements KeyListener, ActionListener, MouseListener
 
  @Override
  public void mousePressed(MouseEvent e){
-  if(screen == INTRO){
-    Point mouse = MouseInfo.getPointerInfo().getLocation();
-   Point offset = getLocationOnScreen();
-   mousex = mouse.x - offset.x;
-   mousey = mouse.y - offset.y;
-   menu.checkScreen(mousex, mousey);
-   if(menu.current_screen.game){
-    String address = JOptionPane.showInputDialog("Enter server address");
-    int port = Integer.parseInt(JOptionPane.showInputDialog("Enter port number"));
-    screen = GAME;
-   }
-  } 
+   
  }
 
  @Override
@@ -116,7 +119,7 @@ class GameP extends JPanel implements KeyListener, ActionListener, MouseListener
   if(screen == INTRO){
       g.setColor(Color.WHITE);
       g.fillRect(0,0, 1500, 1500);
-      menu.drawScreen(g);
+      
   }
   else if(screen == GAME){
    // The last parameter is an ImageObserver. Back when images were not loaded
