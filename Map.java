@@ -44,12 +44,12 @@ class Map implements Serializable, Cloneable{
     }
   }
 
-  public void draw(Graphics g, int px, int py){
+  public void draw(Graphics g, int px, int py, int camx, int camy){
     g.setColor(Color.YELLOW);
     for(int y = 0; y < tiles.size(); y++){
       for(int x = 0; x < tiles.get(0).size(); x++){
         if(tiles.get(y).get(x) != null){
-          g.fillRect(x*tilesize + (300-px), y*tilesize + (400-py), tilesize, tilesize);
+          g.fillRect(x*tilesize + (camx-px), y*tilesize + (camy-py), tilesize, tilesize);
         }
       }
     }

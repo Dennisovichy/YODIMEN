@@ -36,8 +36,14 @@ class GamePanel extends JPanel implements KeyListener, ActionListener, MouseList
  Image back;
  Image frog_icon;
 
+ int centerx;
+ int centery;
+
  int mousex;
  int mousey;
+ int mousex_offset = 0;
+ int mousey_offset = 0;
+ boolean mouse_pressed = false;
 
  Scanner freeman = new Scanner(System.in);
  
@@ -47,7 +53,6 @@ class GamePanel extends JPanel implements KeyListener, ActionListener, MouseList
  
   keys = new boolean[KeyEvent.KEY_LAST+1]; 
   //127.0.0.1 local host
-  
   setPreferredSize(new Dimension(800, 780));
   setFocusable(true);
   requestFocus();
@@ -70,11 +75,21 @@ class GamePanel extends JPanel implements KeyListener, ActionListener, MouseList
  @Override
  public void actionPerformed(ActionEvent e){
   counter += 1;
-  
+  Point offset = new Point(0,0);
   Point mouse = MouseInfo.getPointerInfo().getLocation();
-  Point offset = getLocationOnScreen();
+  try{
+    offset = getLocationOnScreen();
+  }
+  catch(IllegalComponentStateException err){
+    
+  }
   mousex = mouse.x - offset.x;
   mousey = mouse.y - offset.y;
+
+  centerx = getWidth()/2;
+  centery = getHeight()/2;
+  mousex_offset = centerx - mousex;
+  mousey_offset = centery - mousey;
   //System.out.println(mousex + ", " + mousey);
 
   //System.out.println(Arrays.toString(keys));
@@ -127,8 +142,8 @@ class GamePanel extends JPanel implements KeyListener, ActionListener, MouseList
     try {
         Socket test = new Socket(address, port);
         client = new YodiClient(test);
-        spamming = new SpamSocket(client, keys);
-        client.sendInfoToServer(keys, counter);
+        spamming = new SpamSocket(client, keys, this);
+        client.sendInfoToServer(keys, counter, mousex_offset, mousey_offset, mouse_pressed);
         //client.sendInfoToServer(true, false);
         spamming.start();
         screen = CHOOSE;
@@ -150,10 +165,17 @@ class GamePanel extends JPanel implements KeyListener, ActionListener, MouseList
     screen = GAME;
    }
   } 
+  if(screen == GAME){
+    mouse_pressed = true;
+  }
  }
 
  @Override
- public void mouseReleased(MouseEvent e){}
+ public void mouseReleased(MouseEvent e){
+  if(screen == GAME){
+    mouse_pressed = false;
+  }
+ }
 
  @Override
  public void paint(Graphics g){
@@ -166,12 +188,12 @@ class GamePanel extends JPanel implements KeyListener, ActionListener, MouseList
     g.setColor(new Color(255,255,255));
    g.fillRect(0,0,getWidth(), getHeight());
    if(display_info != null){
-    display_info.game_map.draw(g, display_info.player_x, display_info.player_y);
+    display_info.game_map.draw(g, display_info.player_x, display_info.player_y, centerx, centery);
     int count = 0;
     for(Player play: display_info.players){
       if(play != null){
         count += 1;
-        play.draw(g, display_info.player_x, display_info.player_y);
+        play.draw(g, display_info.player_x, display_info.player_y, centerx, centery);
       }
     }
     //System.out.println(count);
@@ -188,7 +210,7 @@ class YodiClient{
     private ObjectInputStream input = null;
     private ObjectOutputStream out = null;
 
-    private boolean send_turn = true;
+    private boolean send_turn = false;
 
     private DisplayPacket display = null;
  
@@ -255,11 +277,11 @@ class YodiClient{
  
     }
 
-    public void sendInfoToServer(boolean[] inputs, long counter){
+    public void sendInfoToServer(boolean[] inputs, long counter, int mousex_offset, int mousey_offset, boolean mouse_pressed){
       if(send_turn){
         //System.out.println("Ran");
         boolean[] temp = inputs.clone();
-        InputPacket send = new InputPacket(temp, counter);
+        InputPacket send = new InputPacket(temp, counter, mousex_offset, mousey_offset, mouse_pressed);
         //InputPacket send = new InputPacket(inputs);
         try{
           out.writeObject(send);
@@ -297,6 +319,7 @@ class YodiClient{
         }
       } 
       catch (Exception e) {
+        
         System.out.println(e);
         System.out.println("SEIU");
       }
@@ -309,19 +332,21 @@ class YodiClient{
 
 class SpamSocket extends Thread{
   YodiClient ref;
+  GamePanel game;
   boolean[] keys;
   public long counter = 0;
 
-  public SpamSocket(YodiClient in, boolean[] keys){
+  public SpamSocket(YodiClient in, boolean[] keys, GamePanel ref){
     this.ref = in;
     this.keys = keys;
+    this.game = ref;
   }
 
   @Override
   public void run(){
     while (true) { 
         ref.readServerInfo();
-        ref.sendInfoToServer(this.keys, counter);
+        ref.sendInfoToServer(this.keys, counter, game.mousex_offset, game.mousey_offset, game.mouse_pressed);
         //ref.sendInfoToServer(true, false);
     }
   }

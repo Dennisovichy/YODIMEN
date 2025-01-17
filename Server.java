@@ -115,6 +115,7 @@ class ServerConnection extends JPanel
                         if(player_inputs[i] != null){
                             if(player_inputs[i].keys != null){
                                 player_objects[i].checkInput(player_inputs[i].keys);
+                                player_objects[i].updateLookPos(player_inputs[i].mousex_offset, player_inputs[i].mousey_offset);
                             }
                             player_objects[i].checkMapCollision(map);
                             player_objects[i].updatePos();
@@ -142,6 +143,13 @@ class ServerConnection extends JPanel
         for(int i = 0; i < 4; i++){
             if(player_objects[i] != null){
                 player_objects[i].draw(g);
+                if(player_inputs[i].mouse_pressed){
+                    g.setColor(Color.RED);
+                }
+                else{
+                    g.setColor(Color.BLUE);
+                }
+                g.drawLine(player_objects[i].x, player_objects[i].y, player_objects[i].lookat_x, player_objects[i].lookat_y);
             }
         }
         map.draw(g);

@@ -18,6 +18,9 @@ public class Player implements Serializable, Cloneable{
     public int x;
     public int y;
 
+    public int lookat_x;
+    public int lookat_y;
+    public float lookat_angle = 0;
 
     private int movement_x = 0;
     private int movement_y = 0;
@@ -39,6 +42,8 @@ public class Player implements Serializable, Cloneable{
     public Player(int x, int y, boolean redteam){
         this.x = x;
         this.y = y;
+        this.lookat_x = x;
+        this.lookat_y = y;
         this.red_team = redteam;
     }
 
@@ -46,6 +51,11 @@ public class Player implements Serializable, Cloneable{
     public Object clone() throws CloneNotSupportedException{
         Player temp = (Player)super.clone();
         return temp;
+    }
+
+    public void updateLookPos(int offsetx, int offsety){
+        this.lookat_x = this.x - offsetx;
+        this.lookat_y = this.y - offsety;
     }
 
     public Rectangle getHitbox(){
@@ -164,7 +174,7 @@ public class Player implements Serializable, Cloneable{
         }
     }
 
-    public void draw(Graphics g, int px, int py){
+    public void draw(Graphics g, int px, int py, int centx, int centy){
         Graphics2D g2 = (Graphics2D)g;
         if(red_team){
             g2.setColor(Color.RED);
@@ -172,13 +182,13 @@ public class Player implements Serializable, Cloneable{
         else{
             g2.setColor(Color.BLUE);
         }
-        g2.fillRect(x - (width/2) + (300 - px), y - (height/2) + (400 - py), width, height);
+        g2.fillRect(x - (width/2) + (centx - px), y - (height/2) + (centy - py), width, height);
         //g2.fillRect(300 - (x - px) - (width/2),400 - (y - py) - (height/2), width, height);
         //System.out.println(x);
         g2.setColor(Color.BLACK);
         Rectangle[] drawthese = getCollideBoxes();
         for(Rectangle draw : drawthese){
-            g2.drawRect(draw.x + (300 - px), draw.y + (400 - py), draw.width, draw.height);
+            g2.drawRect(draw.x + (centx - px), draw.y + (centy - py), draw.width, draw.height);
         }
     }
 }
