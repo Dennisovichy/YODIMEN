@@ -40,6 +40,7 @@ class ServerConnection extends JPanel
     private ObjectOutputStream[] outputs = new ObjectOutputStream[4];
     public InputPacket[] player_inputs = {null,null,null,null};
     private Player[] player_objects = {null,null,null,null};
+    private Inventory[] player_inventorys = {null, null, null, null};
     private boolean newline = false;
 
     javax.swing.Timer timer;
@@ -117,6 +118,12 @@ class ServerConnection extends JPanel
                                 player_objects[i].checkInput(player_inputs[i].keys);
                                 player_objects[i].updateLookPos(player_inputs[i].mousex_offset, player_inputs[i].mousey_offset);
                             }
+                            if(player_inputs[i].inventory_swap_request != null){
+                                //if(player_inputs[i].inventory_swap_request[0] != -1 || player_inputs[i].inventory_swap_request[1] != -1){
+                                    //System.out.println(Arrays.toString(player_inputs[i].inventory_swap_request));
+                                
+                                player_inventorys[i].swapSlots(player_inputs[i].inventory_swap_request);
+                            }
                             player_objects[i].checkMapCollision(map);
                             player_objects[i].updatePos();
                             //System.out.println(player_objects[i].x);
@@ -141,7 +148,7 @@ class ServerConnection extends JPanel
         g.setColor(new Color(255,255,255));
         g.fillRect(0, 0, 1000, 1000);
         for(int i = 0; i < 4; i++){
-            if(player_objects[i] != null){
+            if(player_inputs[i] != null){
                 player_objects[i].draw(g);
                 if(player_inputs[i].mouse_pressed){
                     g.setColor(Color.RED);
@@ -166,6 +173,8 @@ class ServerConnection extends JPanel
                         System.out.println(line.decision_made);
                         if(line.decision_made == true){
                             player_objects[id] = new Player(300, 400, line.red_team);
+                            player_inventorys[id] = new Inventory();
+                            player_inventorys[id].addItem("pistol");
                         }
                     }
                         player_inputs[id] = line;
@@ -213,11 +222,12 @@ class ServerConnection extends JPanel
             //System.out.println(sendy[id].x);
             DisplayPacket send = null;
             try{
+                player_inventorys[id].hotbar = player_inventorys[id].hotbar.clone();
                 if(player_objects[id] != null){
-                    send = new DisplayPacket(player_objects[id].x, player_objects[id].y, (Map)map.clone(), sendy);
+                    send = new DisplayPacket(player_objects[id].x, player_objects[id].y, (Map)map.clone(), sendy, (Inventory)player_inventorys[id].clone());
                 }
                 else{
-                    send = new DisplayPacket(map.default_camx, map.default_camy, (Map)map.clone(), sendy);
+                    send = new DisplayPacket(map.default_camx, map.default_camy, (Map)map.clone(), sendy, (Inventory)player_inventorys[id].clone());
                 }
             }
             catch(Exception e){

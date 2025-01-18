@@ -7,16 +7,18 @@ public class InputPacket implements Serializable{
   int mousex_offset = 0;
   int mousey_offset = 0;
   boolean mouse_pressed = false;
+  int[] inventory_swap_request;
 
   boolean red_team = false;
   boolean decision_made = false;
 
-  public InputPacket(boolean[] inputs, long counter, int mousex, int mousey, boolean pressed){
+  public InputPacket(boolean[] inputs, long counter, int mousex, int mousey, boolean pressed, int[] inventory_swap){
     this.keys = inputs;
     this.frame = counter;
     this.mousex_offset = mousex;
     this.mousey_offset = mousey;
     this.mouse_pressed = pressed;
+    this.inventory_swap_request = inventory_swap;
   }
 
   public InputPacket(boolean decision_made, boolean team){

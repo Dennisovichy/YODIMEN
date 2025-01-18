@@ -43,7 +43,13 @@ class GamePanel extends JPanel implements KeyListener, ActionListener, MouseList
  int mousey;
  int mousex_offset = 0;
  int mousey_offset = 0;
+
  boolean mouse_pressed = false;
+
+ int item_start;
+ Item held = null;
+ boolean holding_item = false;
+ int[] swap_request = {-1, -1};
 
  Scanner freeman = new Scanner(System.in);
  
@@ -67,7 +73,7 @@ class GamePanel extends JPanel implements KeyListener, ActionListener, MouseList
    
   }
   else if(screen == GAME){
-   
+    //System.out.println(held);
   }
 
  }
@@ -77,7 +83,7 @@ class GamePanel extends JPanel implements KeyListener, ActionListener, MouseList
   counter += 1;
   Point offset = new Point(0,0);
   Point mouse = MouseInfo.getPointerInfo().getLocation();
-  offset = getLocationOnScreen();
+  
   try{
     offset = getLocationOnScreen();
   }
@@ -144,7 +150,7 @@ class GamePanel extends JPanel implements KeyListener, ActionListener, MouseList
         Socket test = new Socket(address, port);
         client = new YodiClient(test);
         spamming = new SpamSocket(client, keys, this);
-        client.sendInfoToServer(keys, counter, mousex_offset, mousey_offset, mouse_pressed);
+        //client.sendInfoToServer(keys, counter, mousex_offset, mousey_offset, mouse_pressed);
         //client.sendInfoToServer(true, false);
         //spamming.start();
         screen = CHOOSE;
@@ -170,6 +176,17 @@ class GamePanel extends JPanel implements KeyListener, ActionListener, MouseList
   } 
   if(screen == GAME){
     mouse_pressed = true;
+    if(!holding_item){
+      if(display_info != null){
+        if(display_info.inventory != null){
+          held = display_info.inventory.selectItem(centerx, getHeight(), mousex, mousey);
+          if(held != null){
+            holding_item = true;
+            item_start = display_info.inventory.getSlot(centerx, getHeight(), mousex, mousey);
+          }
+        }
+      }
+    }
   }
  }
 
@@ -177,6 +194,15 @@ class GamePanel extends JPanel implements KeyListener, ActionListener, MouseList
  public void mouseReleased(MouseEvent e){
   if(screen == GAME){
     mouse_pressed = false;
+    if(holding_item){
+      int end_point = display_info.inventory.getSlot(centerx, getHeight(), mousex, mousey);
+      if(end_point != -1){
+        swap_request[0] = item_start;
+        swap_request[1] = end_point;
+      }
+      holding_item = false;
+      held = null;
+    }
   }
  }
 
@@ -199,7 +225,13 @@ class GamePanel extends JPanel implements KeyListener, ActionListener, MouseList
         play.draw(g, display_info.player_x, display_info.player_y, centerx, centery);
       }
     }
-    //System.out.println(count);
+    if(display_info.inventory != null){
+      display_info.inventory.draw(g, centerx, getHeight());
+      System.out.println(Arrays.toString(display_info.inventory.hotbar));
+    }
+    if(holding_item){
+      held.draw(g, mousex, mousey);
+    }
    }  
   }
     }
@@ -280,11 +312,9 @@ class YodiClient{
  
     }
 
-    public void sendInfoToServer(boolean[] inputs, long counter, int mousex_offset, int mousey_offset, boolean mouse_pressed){
+    public void sendInfoToServer(boolean[] inputs, long counter, int mousex_offset, int mousey_offset, boolean mouse_pressed, int[] swap){
       if(send_turn){
-        //System.out.println("Ran");
-        boolean[] temp = inputs.clone();
-        InputPacket send = new InputPacket(temp, counter, mousex_offset, mousey_offset, mouse_pressed);
+        InputPacket send = new InputPacket(inputs.clone(), counter, mousex_offset, mousey_offset, mouse_pressed, swap.clone());
         //InputPacket send = new InputPacket(inputs);
         try{
           out.writeObject(send);
@@ -349,7 +379,12 @@ class SpamSocket extends Thread{
   public void run(){
     while (true) { 
         ref.readServerInfo();
-        ref.sendInfoToServer(this.keys, counter, game.mousex_offset, game.mousey_offset, game.mouse_pressed);
+        ref.sendInfoToServer(this.keys, counter, game.mousex_offset, game.mousey_offset, game.mouse_pressed, game.swap_request);
+        if(game.swap_request[0] != -1 || game.swap_request[1] != -1){
+          System.out.println(Arrays.toString(game.swap_request));
+          game.swap_request[0] = -1;
+          game.swap_request[1] = -1;
+        }
         //ref.sendInfoToServer(true, false);
     }
   }

@@ -21,9 +21,8 @@ public class test extends JFrame{
 
 class GameP extends JPanel implements KeyListener, ActionListener, MouseListener{
  public static final int INTRO=0, GAME=1, END=2;
- private int screen = INTRO;
+ private int screen = GAME;
 
- Menu menu = new Menu();
  private boolean []keys;
  long counter = 0;
  javax.swing.Timer timer;
@@ -33,8 +32,13 @@ class GameP extends JPanel implements KeyListener, ActionListener, MouseListener
  int mousex;
  int mousey;
 
+ int widthx;
+ int widthy;
+
  int camx = 0;
  int camy = 0;
+
+ //ArrayList<ArrayList<Tile>> build_map = new ArrayList<>();
 
  Scanner freeman = new Scanner(System.in);
  
@@ -57,7 +61,18 @@ class GameP extends JPanel implements KeyListener, ActionListener, MouseListener
   
   }
   else if(screen == GAME){
-   
+    if(keys[KeyEvent.VK_W]){
+      camy -= 10;
+    }
+    if(keys[KeyEvent.VK_S]){
+      camy += 10;
+    }
+    if(keys[KeyEvent.VK_A]){
+      camx -= 10;
+    }
+    if(keys[KeyEvent.VK_D]){
+      camx += 10;
+    }
   }
 
  }
@@ -75,6 +90,10 @@ class GameP extends JPanel implements KeyListener, ActionListener, MouseListener
   }
   mousex = mouse.x - offset.x;
   mousey = mouse.y - offset.y;
+
+  widthx = getWidth();
+  widthy = getHeight();
+
   move();
   repaint();
 
@@ -117,15 +136,18 @@ class GameP extends JPanel implements KeyListener, ActionListener, MouseListener
  @Override
  public void paint(Graphics g){
   if(screen == INTRO){
-      g.setColor(Color.WHITE);
-      g.fillRect(0,0, 1500, 1500);
       
   }
   else if(screen == GAME){
-   // The last parameter is an ImageObserver. Back when images were not loaded
-   // right away you would specify what object would be notified when it was loaded.
-   // We are not doing that, so null will always be fine.
-   
+    g.setColor(Color.WHITE);
+    g.fillRect(0,0, 1500, 1500);
+    g.setColor(Color.BLACK);
+    for(int i = 0; i < (widthx/Map.tilesize + 5); i++){
+      g.drawLine(((0 - camx) % Map.tilesize) + i*Map.tilesize, 0, ((0 - camx) % Map.tilesize) + i*Map.tilesize, widthy);
+    }
+    for(int i = 0; i < (widthy/Map.tilesize + 5); i++){
+      g.drawLine(0, ((0 - camy) % Map.tilesize) + i*Map.tilesize, widthx,  ((0 - camy) % Map.tilesize) + i*Map.tilesize);
+    }
   }
     }
 }
