@@ -4,6 +4,7 @@ import java.util.Arrays;
 
 class Inventory implements Serializable, Cloneable{
     Item[] hotbar = new Item[10];
+    boolean acknowledge_swap = false;
 
     @Override
     public Object clone() throws CloneNotSupportedException{

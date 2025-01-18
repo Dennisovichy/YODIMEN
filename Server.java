@@ -119,9 +119,12 @@ class ServerConnection extends JPanel
                                 player_objects[i].updateLookPos(player_inputs[i].mousex_offset, player_inputs[i].mousey_offset);
                             }
                             if(player_inputs[i].inventory_swap_request != null){
-                                //if(player_inputs[i].inventory_swap_request[0] != -1 || player_inputs[i].inventory_swap_request[1] != -1){
-                                    //System.out.println(Arrays.toString(player_inputs[i].inventory_swap_request));
-                                
+                                if(player_inputs[i].inventory_swap_request[0] != -1 || player_inputs[i].inventory_swap_request[1] != -1){
+                                    player_inventorys[i].acknowledge_swap = true;
+                                }
+                                if(player_inputs[i].inventory_swap_request[0] == -1 && player_inputs[i].inventory_swap_request[1] == -1){
+                                    player_inventorys[i].acknowledge_swap = false;
+                                }
                                 player_inventorys[i].swapSlots(player_inputs[i].inventory_swap_request);
                             }
                             player_objects[i].checkMapCollision(map);

@@ -103,7 +103,10 @@ class GamePanel extends JPanel implements KeyListener, ActionListener, MouseList
   if(keys[KeyEvent.VK_LEFT]){
     //System.out.println(Arrays.toString(keys));
   }
-  //client.sendInfoToServer(keys, counter);
+  
+  if(spamming != null){
+    spamming.make_swapRequest = true;
+  }
   move(); 
 
   if(screen == GAME || screen == CHOOSE){
@@ -199,6 +202,7 @@ class GamePanel extends JPanel implements KeyListener, ActionListener, MouseList
       if(end_point != -1){
         swap_request[0] = item_start;
         swap_request[1] = end_point;
+        spamming.make_swapRequest = true;
       }
       holding_item = false;
       held = null;
@@ -227,7 +231,7 @@ class GamePanel extends JPanel implements KeyListener, ActionListener, MouseList
     }
     if(display_info.inventory != null){
       display_info.inventory.draw(g, centerx, getHeight());
-      System.out.println(Arrays.toString(display_info.inventory.hotbar));
+      //System.out.println(Arrays.toString(display_info.inventory.hotbar));
     }
     if(holding_item){
       held.draw(g, mousex, mousey);
@@ -368,6 +372,7 @@ class SpamSocket extends Thread{
   GamePanel game;
   boolean[] keys;
   public long counter = 0;
+  boolean make_swapRequest = false;
 
   public SpamSocket(YodiClient in, boolean[] keys, GamePanel ref){
     this.ref = in;
@@ -379,12 +384,22 @@ class SpamSocket extends Thread{
   public void run(){
     while (true) { 
         ref.readServerInfo();
-        ref.sendInfoToServer(this.keys, counter, game.mousex_offset, game.mousey_offset, game.mouse_pressed, game.swap_request);
         if(game.swap_request[0] != -1 || game.swap_request[1] != -1){
-          System.out.println(Arrays.toString(game.swap_request));
-          game.swap_request[0] = -1;
-          game.swap_request[1] = -1;
+          if(game.display_info.inventory != null){
+            if(game.display_info.inventory.acknowledge_swap){
+              game.swap_request[0] = -1;
+              game.swap_request[1] = -1;
+            }
+          }
         }
+        if(make_swapRequest){
+          ref.sendInfoToServer(this.keys, counter, game.mousex_offset, game.mousey_offset, game.mouse_pressed, game.swap_request);
+        }
+        else{
+          int[] temp = {-1, -1};
+          ref.sendInfoToServer(this.keys, counter, game.mousex_offset, game.mousey_offset, game.mouse_pressed, temp);
+        }
+        make_swapRequest = false;
         //ref.sendInfoToServer(true, false);
     }
   }
