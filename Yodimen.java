@@ -221,6 +221,9 @@ class GamePanel extends JPanel implements KeyListener, ActionListener, MouseList
     g.setColor(new Color(255,255,255));
    g.fillRect(0,0,getWidth(), getHeight());
    if(display_info != null){
+    for(Projectile proj : display_info.projectiles){
+      proj.draw(g, display_info.player_x, display_info.player_y, centerx, centery);
+    }
     display_info.game_map.draw(g, display_info.player_x, display_info.player_y, centerx, centery);
     int count = 0;
     for(Player play: display_info.players){
@@ -384,6 +387,11 @@ class SpamSocket extends Thread{
   public void run(){
     while (true) { 
         ref.readServerInfo();
+
+        boolean press_mouse = game.mouse_pressed;
+        if(game.holding_item){
+          press_mouse = false;
+        }
         if(game.swap_request[0] != -1 || game.swap_request[1] != -1){
           if(game.display_info.inventory != null){
             if(game.display_info.inventory.acknowledge_swap){
@@ -393,13 +401,13 @@ class SpamSocket extends Thread{
           }
         }
         if(make_swapRequest){
-          ref.sendInfoToServer(this.keys, counter, game.mousex_offset, game.mousey_offset, game.mouse_pressed, game.swap_request);
+          ref.sendInfoToServer(this.keys, counter, game.mousex_offset, game.mousey_offset, press_mouse, game.swap_request);
+          make_swapRequest = false;
         }
         else{
           int[] temp = {-1, -1};
-          ref.sendInfoToServer(this.keys, counter, game.mousex_offset, game.mousey_offset, game.mouse_pressed, temp);
+          ref.sendInfoToServer(this.keys, counter, game.mousex_offset, game.mousey_offset, press_mouse, temp);
         }
-        make_swapRequest = false;
         //ref.sendInfoToServer(true, false);
     }
   }
