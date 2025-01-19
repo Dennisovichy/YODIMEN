@@ -1,7 +1,6 @@
 import java.awt.*;
 import java.awt.event.*;
 import java.io.Serializable;
-import java.util.*;
 
 class BaseEntity{
     private int x;
@@ -129,8 +128,7 @@ public class Player implements Serializable, Cloneable{
         colliding_up = false;
 
         Rectangle[] rects = getCollideBoxes();
-        for(ArrayList<Tile> tilelist: map.tiles){
-            for(Tile tile : tilelist){
+            for(Tile tile : map.build_map){
                 if(tile != null){
                 if(!colliding_left){
                     if(tile.getHitbox().intersects(rects[0])){
@@ -155,7 +153,6 @@ public class Player implements Serializable, Cloneable{
                         colliding_down = true;
                         //System.out.println("down collide");
                     }
-                }
                 }
             }
         }

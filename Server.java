@@ -165,11 +165,20 @@ class ServerConnection extends JPanel
                
             }
         };
-
+        load();
         timer = new javax.swing.Timer(10, taskPerformer);
         timer.setRepeats(true);
         timer.start();
     }
+
+    public void load(){
+        try (FileInputStream file = new FileInputStream("maps/Map1");
+        ObjectInputStream inputStream = new ObjectInputStream(file);){// stream the plot data to a file
+            this.map = (Map)inputStream.readObject();// write it 
+        } catch (Exception e) {
+            System.out.println(e);
+        }
+      }
 
     @Override
     public void paint(Graphics g){

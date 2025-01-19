@@ -1,6 +1,5 @@
 import java.awt.*;
 import java.io.Serializable;
-import java.util.*;
 
 class Projectile implements Serializable, Cloneable{
     public static final int FIZZLE = 0, DAMAGE = 1, EXPLODE = 2; //POSSIBLE BEHAVIORS ON CONTACT
@@ -77,12 +76,10 @@ class Projectile implements Serializable, Cloneable{
 
     public Tile checkMapCollision(Map map){
         Rectangle rect = getHitbox();
-        for(ArrayList<Tile> tilelist: map.tiles){
-            for(Tile tile : tilelist){
-                if(tile != null){
-                    if(tile.getHitbox().intersects(rect)){
-                        return tile;
-                    }
+        for(Tile tile : map.build_map){
+            if(tile != null){
+                if(tile.getHitbox().intersects(rect)){
+                    return tile;
                 }
             }
         }
