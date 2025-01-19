@@ -130,14 +130,14 @@ class GameP extends JPanel implements KeyListener, ActionListener, MouseListener
  public void mousePressed(MouseEvent e){
     boolean occupied = false;
    for (Tile tile : build_map){
-    if (tile.pointCollision(mousex, mousey)){// check if the mouse is colliding with any of the tiles to avoid two tiles inhabiting the same space
+    if (tile.pointCollision(mousex + camx, mousey + camy)){// check if the mouse is colliding with any of the tiles to avoid two tiles inhabiting the same space
       occupied = true;
-      System.out.println("colis");
+      System.out.println("can't place there bub");
     }
    }
    if (!occupied){
-    System.out.printf("%d %d %d %d " ,mousex - ((mousex + (0 - camx)) % Map.tilesize) + (0 - camx), mousey - ((mousey + (0 - camy)) % Map.tilesize) + (0 - camy), mousex, mousey);
-     build_map.add(new Tile(mousex - ((mousex + (0 - camx)) % Map.tilesize) + (0 - camx), mousey - ((mousey + (0 - camy)) % Map.tilesize) + (0 - camy)));// adding a new tile at the mouse if there is no preexisting tile
+    System.out.println(mousex - ((mousex + (0 - camx)) % Map.tilesize) + camx+ " " + ( mousey - ((mousey + (0 - camy)) % Map.tilesize) + camy));
+     build_map.add(new Tile(mousex - ((mousex + (0 - camx)) % Map.tilesize) + camx, mousey - ((mousey + (0 - camy)) % Map.tilesize) + camy));// adding a new tile at the mouse if there is no preexisting tile
    }
  }
 
