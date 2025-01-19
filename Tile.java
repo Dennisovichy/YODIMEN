@@ -9,10 +9,14 @@ class Tile implements Serializable{
     private boolean[] collision = {true, true};
     private Rectangle hitbox;
     
-    public Tile(int x, int y){
+    public Tile(int x, int y, int type, String sprite_path){
       this.x = x;
       this.y = y;
+      this.type = type;
+      
     }
+
+    public int getType(){return this.type;}
 
     public Rectangle getHitbox(){
       return new Rectangle(x, y, Map.tilesize, Map.tilesize);

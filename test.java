@@ -1,5 +1,9 @@
 import java.awt.*;
 import java.awt.event.*;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.*;
 import javax.swing.*;
 
@@ -28,6 +32,8 @@ class GameP extends JPanel implements KeyListener, ActionListener, MouseListener
  javax.swing.Timer timer;
  Image back;
  Image frog_icon;
+ 
+ Map map;
 
  int mousex;
  int mousey;
@@ -38,13 +44,17 @@ class GameP extends JPanel implements KeyListener, ActionListener, MouseListener
  int camx = 0;
  int camy = 0;
 
- ArrayList<Tile> build_map = new ArrayList<>();
+ int selected_type;
+
+ //ArrayList<Tile> build_map = new ArrayList<>();
 
  //ArrayList<ArrayList<Tile>> build_map = new ArrayList<>();
 
  Scanner freeman = new Scanner(System.in);
  
  public GameP(){
+  
+  map = new Map();
   
   back = new ImageIcon("background.png").getImage();
   keys = new boolean[KeyEvent.KEY_LAST+1]; 
@@ -56,6 +66,9 @@ class GameP extends JPanel implements KeyListener, ActionListener, MouseListener
   addMouseListener(this);
   timer = new javax.swing.Timer(10, this);
   timer.start();
+
+
+  this.selected_type = 0;
  }
 
  public void move(){
@@ -76,8 +89,35 @@ class GameP extends JPanel implements KeyListener, ActionListener, MouseListener
       camx += 40;
     }
   }
-
  }
+
+  public void save(){
+    Scanner scanner = new Scanner(System.in);
+    System.out.println("Enter save num:");
+    try (FileOutputStream file = new FileOutputStream("maps/Map" + scanner.nextLine());
+    ObjectOutputStream outputStream = new ObjectOutputStream(file);){// stream the plot data to a file
+        Map tmp = null;
+        try {
+            tmp = (Map)this.map.clone();// clone plot
+        } catch (Exception e) {
+        }
+        outputStream.writeObject(tmp);// write it 
+    } catch (Exception e) {
+        System.out.println(e);
+    }
+  }
+
+  public void load(){
+    Scanner scanner = new Scanner(System.in);
+    System.out.println("Enter save num:");
+    try (FileInputStream file = new FileInputStream("maps/Map" + scanner.nextLine());
+    ObjectInputStream inputStream = new ObjectInputStream(file);){// stream the plot data to a file
+        this.map = (Map)inputStream.readObject();// write it 
+    } catch (Exception e) {
+        System.out.println(e);
+    }
+  }
+
  
  @Override
  public void actionPerformed(ActionEvent e){
@@ -111,6 +151,14 @@ class GameP extends JPanel implements KeyListener, ActionListener, MouseListener
   //System.out.println("press");
   //client.sendInfoToServer(keys);
   int key = ke.getKeyCode();
+  switch (key) {
+    case KeyEvent.VK_1 -> {this.selected_type = 1;}
+    case KeyEvent.VK_2 -> {this.selected_type = 2;}
+    case KeyEvent.VK_3 -> {this.selected_type = 3;}
+    case KeyEvent.VK_4 -> {this.selected_type = 4;}
+    case KeyEvent.VK_0 -> {save(); System.out.println("save");}
+    case KeyEvent.VK_9 -> {load();System.out.println("load");}
+  }
   //System.out.println("Press");
   keys[key] = true;
  }
@@ -128,18 +176,28 @@ class GameP extends JPanel implements KeyListener, ActionListener, MouseListener
 
  @Override
  public void mousePressed(MouseEvent e){
-    boolean occupied = false;
-   for (Tile tile : build_map){
-    if (tile.pointCollision(mousex + camx, mousey + camy)){// check if the mouse is colliding with any of the tiles to avoid two tiles inhabiting the same space
-      occupied = true;
-      System.out.println("can't place there bub");
+  switch (e.getButton()) {
+      case MouseEvent.BUTTON1 -> {// left click (add tile)
+        boolean occupied = false;// flag to check if this space already has a tile
+        for (Tile tile : this.map.build_map){
+          if (tile.pointCollision(mousex + camx, mousey + camy)){// check if the mouse is colliding with any of the tiles to avoid two tiles inhabiting the same space
+            occupied = true;
+          }
+        }
+        if (!occupied){// no prexisting tile in this space
+          this.map.build_map.add(new Tile(mousex - ((mousex + (0 - camx)) % Map.tilesize) + camx, mousey - ((mousey + (0 - camy)) % Map.tilesize) + camy, this.selected_type, ""));// adding a new tile at the mouse if there is no preexisting tile
+        }
+      }
+
+      case MouseEvent.BUTTON3 -> {// right click (remove tile)
+        for (int i = this.map.build_map.size() - 1; i >= 0; i --){
+          if (this.map.build_map.get(i).pointCollision(mousex + camx, mousey + camy)){// check if the mouse is colliding with any of the tiles
+            this.map.build_map.remove(this.map.build_map.get(i));// remove this tile
+          }
+        }
+      }
     }
-   }
-   if (!occupied){
-    System.out.println(mousex - ((mousex + (0 - camx)) % Map.tilesize) + camx+ " " + ( mousey - ((mousey + (0 - camy)) % Map.tilesize) + camy));
-     build_map.add(new Tile(mousex - ((mousex + (0 - camx)) % Map.tilesize) + camx, mousey - ((mousey + (0 - camy)) % Map.tilesize) + camy));// adding a new tile at the mouse if there is no preexisting tile
-   }
- }
+  }
 
  @Override
  public void mouseReleased(MouseEvent e){}
@@ -160,8 +218,13 @@ class GameP extends JPanel implements KeyListener, ActionListener, MouseListener
           g.drawLine(0, ((0 - camy) % Map.tilesize) + i*Map.tilesize, widthx,  ((0 - camy) % Map.tilesize) + i*Map.tilesize);
         }
 
-        for (Tile tile : build_map) {
-            g.setColor(new Color(255, 0, 255));
+        for (Tile tile : this.map.build_map) {
+            switch (tile.getType()) {
+              case 1 -> {g.setColor(new Color(255, 0, 255));}
+              case 2 -> {g.setColor(new Color(255, 255, 0));}
+              case 3 -> {g.setColor(new Color(0, 0, 255));}
+              case 4 -> {g.setColor(new Color(255, 0, 0));}
+            }
             g.fillRect(tile.getX() + (0 - camx), tile.getY() + (0 - camy), Map.tilesize, Map.tilesize);
         }
       }
