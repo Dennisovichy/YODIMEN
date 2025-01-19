@@ -17,4 +17,11 @@ class Tile implements Serializable{
     public Rectangle getHitbox(){
       return new Rectangle(x, y, Map.tilesize, Map.tilesize);
     }
+
+    public boolean pointCollision(int x, int y){
+      return x > this.x && x < this.x + Map.tilesize && y > this.y && y < this.y + Map.tilesize;
+    }
+
+    public int getX(){return this.x;}
+    public int getY(){return this.y;}
 }
