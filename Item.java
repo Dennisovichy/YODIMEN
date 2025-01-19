@@ -25,6 +25,25 @@ class Item implements Serializable{
         }
     }
 
+    public void update(){
+        if(uses_counter < use_times){
+            if(cooldown_counter < cooldown){
+                cooldown_counter++;
+            }
+            
+        }
+        else{
+            if(reload_counter < reload_cooldown){
+                reload_counter++;
+            }
+            if(reload_counter >= reload_cooldown){
+                reload_counter = 0;
+                uses_counter = 0;
+                cooldown_counter = 0;
+            }
+        }
+    }
+
     public void draw(Graphics g, int x, int y){
         g.setColor(Color.GREEN);
         g.fillRect(x - 30, y - 30, 60, 60);

@@ -6,14 +6,15 @@ public class DisplayPacket implements Serializable{
   Map game_map;
   Player[] players;
   Inventory inventory;
+  Projectile[] projectiles;
 
-
-  public DisplayPacket(int playerx, int playery, Map gamemap, Player[] plurers, Inventory inv){
+  public DisplayPacket(int playerx, int playery, Map gamemap, Player[] plurers, Inventory inv, Projectile[] projs){
     this.player_x = playerx;
     this.player_y = playery;
     this.game_map = gamemap;
     this.players = plurers;
     this.inventory = inv;
+    this.projectiles = projs;
   }
 
 

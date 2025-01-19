@@ -63,4 +63,12 @@ class Inventory implements Serializable, Cloneable{
         }
         return -1;
     }
+
+    public void updateSlots(){
+        for(Item item: hotbar){
+            if (item != null){
+                item.update();
+            }
+        }
+    }
 }

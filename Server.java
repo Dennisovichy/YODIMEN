@@ -6,6 +6,7 @@ import java.awt.event.*;
 import java.io.*;
 import java.net.*;
 import javax.swing.*;
+import java.util.*;
 
 public class Server extends JFrame{
  ServerConnection game= new ServerConnection(1100);
@@ -41,7 +42,8 @@ class ServerConnection extends JPanel
     public InputPacket[] player_inputs = {null,null,null,null};
     private Player[] player_objects = {null,null,null,null};
     private Inventory[] player_inventorys = {null, null, null, null};
-    private boolean newline = false;
+    
+    private ArrayList<Projectile> projectile_list = new ArrayList<Projectile>();
 
     javax.swing.Timer timer;
     ServerConnection ref = this;
@@ -49,14 +51,13 @@ class ServerConnection extends JPanel
     Map map = new Map();
     public static final int screenwidth = 800;
     public static final int screenheight = 780;
- 
     // constructor with port
     public ServerConnection(int port)
     {
         setPreferredSize(new Dimension(screenwidth, screenheight));
         //setFocusable(true);
         // starts server and waits for a connection
-        
+        projectile_list.add(new Projectile(300, 400, (float)Math.toRadians(-3), "bullet_small"));
         try
         {
             for(int i = 0; i<4; i++){
@@ -113,6 +114,9 @@ class ServerConnection extends JPanel
                //update the server state
                 for(int i = 0; i < 4; i++){
                     if(player_objects[i] != null){
+                        if(player_inventorys[i] != null){
+                            player_inventorys[i].updateSlots();
+                        }
                         if(player_inputs[i] != null){
                             if(player_inputs[i].keys != null){
                                 player_objects[i].checkInput(player_inputs[i].keys);
@@ -127,16 +131,37 @@ class ServerConnection extends JPanel
                                 }
                                 player_inventorys[i].swapSlots(player_inputs[i].inventory_swap_request);
                             }
+                            if(player_inputs[i].mouse_pressed){
+                                if(player_inventorys[i].hotbar[player_objects[i].holding_slot] != null){
+                                    if(player_inventorys[i].hotbar[player_objects[i].holding_slot].cooldown_counter == player_inventorys[i].hotbar[player_objects[i].holding_slot].cooldown){
+                                        if(player_inventorys[i].hotbar[player_objects[i].holding_slot].id.equals("pistol")){
+
+                                            projectile_list.add(new Projectile(player_objects[i].x, player_objects[i].y, (float)(Math.atan2((float)player_inputs[i].mousey_offset,(float)player_inputs[i].mousex_offset) + Math.PI), "bullet_small"));
+                                            System.out.println("poundington");
+                                        }
+                                        player_inventorys[i].hotbar[player_objects[i].holding_slot].cooldown_counter = 0;
+                                        player_inventorys[i].hotbar[player_objects[i].holding_slot].uses_counter++;
+                                    }
+                                }
+                            }
+                            
                             player_objects[i].checkMapCollision(map);
                             player_objects[i].updatePos();
                             //System.out.println(player_objects[i].x);
                         }
                     }
                 }
+                for(Projectile bullet : projectile_list){
+                    bullet.update();
+                    if(bullet.checkPlayerCollision(player_objects) != null){
+                        System.out.println("Collide player");
+                    }
+                    if(bullet.checkMapCollision(map) != null){
+                        System.out.println("Collide terrain");
+                    }
+                }
                //draw
                repaint();
-
-               newline = false;
                
             }
         };
@@ -150,6 +175,9 @@ class ServerConnection extends JPanel
     public void paint(Graphics g){
         g.setColor(new Color(255,255,255));
         g.fillRect(0, 0, 1000, 1000);
+        for(Projectile bullet: projectile_list){
+            bullet.draw(g);
+        }
         for(int i = 0; i < 4; i++){
             if(player_inputs[i] != null){
                 player_objects[i].draw(g);
@@ -160,6 +188,7 @@ class ServerConnection extends JPanel
                     g.setColor(Color.BLUE);
                 }
                 g.drawLine(player_objects[i].x, player_objects[i].y, player_objects[i].lookat_x, player_objects[i].lookat_y);
+                //System.out.println(Math.round(Math.toDegrees(Math.atan2((float)player_inputs[i].mousey_offset,(float)player_inputs[i].mousex_offset))));
             }
         }
         map.draw(g);
@@ -209,7 +238,7 @@ class ServerConnection extends JPanel
 
     public void sendClientDisplay(int id){
         if(send_turn[id]){
-            //System.out.println("Ran");
+            
             Player[] sendy = {null, null, null, null};
             for(int i = 0; i < 4; i++){
                 if(player_objects[i] != null){
@@ -221,16 +250,25 @@ class ServerConnection extends JPanel
                 }
                 }
             }
-            //sendy = player_objects.clone();
-            //System.out.println(sendy[id].x);
+            
+            Projectile[] bendy = new Projectile[projectile_list.size()];
+            for(int i = 0; i < projectile_list.size(); i++){
+                try{
+                bendy[i] = (Projectile)projectile_list.get(i).clone();
+                }
+                catch(CloneNotSupportedException e){
+
+                }
+            }
+
             DisplayPacket send = null;
             try{
                 player_inventorys[id].hotbar = player_inventorys[id].hotbar.clone();
                 if(player_objects[id] != null){
-                    send = new DisplayPacket(player_objects[id].x, player_objects[id].y, (Map)map.clone(), sendy, (Inventory)player_inventorys[id].clone());
+                    send = new DisplayPacket(player_objects[id].x, player_objects[id].y, (Map)map.clone(), sendy, (Inventory)player_inventorys[id].clone(), bendy);
                 }
                 else{
-                    send = new DisplayPacket(map.default_camx, map.default_camy, (Map)map.clone(), sendy, (Inventory)player_inventorys[id].clone());
+                    send = new DisplayPacket(map.default_camx, map.default_camy, (Map)map.clone(), sendy, (Inventory)player_inventorys[id].clone(), bendy);
                 }
             }
             catch(Exception e){

@@ -33,6 +33,8 @@ public class Player implements Serializable, Cloneable{
 
     public boolean red_team;
 
+    public int holding_slot = 0;
+
     private boolean colliding_up = false;
     private boolean colliding_down = false;
     private boolean colliding_left = false;
@@ -87,6 +89,36 @@ public class Player implements Serializable, Cloneable{
             if(colliding_down){
                 movement_y = -20;
             }
+        }
+        if(keys[KeyEvent.VK_1]){
+            holding_slot = 0;
+        }
+        if(keys[KeyEvent.VK_2]){
+            holding_slot = 1;
+        }
+        if(keys[KeyEvent.VK_3]){
+            holding_slot = 2;
+        }
+        if(keys[KeyEvent.VK_4]){
+            holding_slot = 3;
+        }
+        if(keys[KeyEvent.VK_5]){
+            holding_slot = 4;
+        }
+        if(keys[KeyEvent.VK_6]){
+            holding_slot = 5;
+        }
+        if(keys[KeyEvent.VK_7]){
+            holding_slot = 6;
+        }
+        if(keys[KeyEvent.VK_8]){
+            holding_slot = 7;
+        }
+        if(keys[KeyEvent.VK_9]){
+            holding_slot = 8;
+        }
+        if(keys[KeyEvent.VK_0]){
+            holding_slot = 9;
         }
     }
 
