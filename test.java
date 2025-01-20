@@ -44,6 +44,9 @@ class GameP extends JPanel implements KeyListener, ActionListener, MouseListener
  int camx = 0;
  int camy = 0;
 
+ boolean holding_left = false;
+ boolean holding_right = false;
+
  int selected_type;
 
  //ArrayList<Tile> build_map = new ArrayList<>();
@@ -87,6 +90,25 @@ class GameP extends JPanel implements KeyListener, ActionListener, MouseListener
     }
     if(keys[KeyEvent.VK_D]){
       camx += 40;
+    }
+
+    if(holding_left){
+      boolean occupied = false;// flag to check if this space already has a tile
+        for (Tile tile : this.map.build_map){
+          if (tile.pointCollision(mousex + camx, mousey + camy)){// check if the mouse is colliding with any of the tiles to avoid two tiles inhabiting the same space
+            occupied = true;
+          }
+        }
+        if (!occupied){// no prexisting tile in this space
+          this.map.build_map.add(new Tile(mousex - ((mousex + (0 - camx)) % Map.tilesize) + camx, mousey - ((mousey + (0 - camy)) % Map.tilesize) + camy, this.selected_type, ""));// adding a new tile at the mouse if there is no preexisting tile
+        }
+    }
+    if(holding_right){
+      for (int i = this.map.build_map.size() - 1; i >= 0; i --){
+          if (this.map.build_map.get(i).pointCollision(mousex + camx, mousey + camy)){// check if the mouse is colliding with any of the tiles
+            this.map.build_map.remove(this.map.build_map.get(i));// remove this tile
+          }
+        }
     }
   }
  }
@@ -178,29 +200,28 @@ class GameP extends JPanel implements KeyListener, ActionListener, MouseListener
  public void mousePressed(MouseEvent e){
   switch (e.getButton()) {
       case MouseEvent.BUTTON1 -> {// left click (add tile)
-        boolean occupied = false;// flag to check if this space already has a tile
-        for (Tile tile : this.map.build_map){
-          if (tile.pointCollision(mousex + camx, mousey + camy)){// check if the mouse is colliding with any of the tiles to avoid two tiles inhabiting the same space
-            occupied = true;
-          }
-        }
-        if (!occupied){// no prexisting tile in this space
-          this.map.build_map.add(new Tile(mousex - ((mousex + (0 - camx)) % Map.tilesize) + camx, mousey - ((mousey + (0 - camy)) % Map.tilesize) + camy, this.selected_type, ""));// adding a new tile at the mouse if there is no preexisting tile
-        }
+        holding_left = true;
       }
 
       case MouseEvent.BUTTON3 -> {// right click (remove tile)
-        for (int i = this.map.build_map.size() - 1; i >= 0; i --){
-          if (this.map.build_map.get(i).pointCollision(mousex + camx, mousey + camy)){// check if the mouse is colliding with any of the tiles
-            this.map.build_map.remove(this.map.build_map.get(i));// remove this tile
-          }
-        }
+        holding_right = true;
       }
     }
   }
 
  @Override
- public void mouseReleased(MouseEvent e){}
+ public void mouseReleased(MouseEvent e){
+  switch (e.getButton()) {
+      case MouseEvent.BUTTON1 -> {// left click (add tile)
+        holding_left = false;
+      }
+
+      case MouseEvent.BUTTON3 -> {// right click (remove tile)
+        holding_right = false;
+      }
+    }
+  }
+ 
 
  @Override
  public void paint(Graphics g){
