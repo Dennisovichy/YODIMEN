@@ -51,6 +51,8 @@ public class Player implements Serializable, Cloneable{
     private static transient Image pistol = new ImageIcon("weapons/pistol.png").getImage();
     private static transient Image autogun = new ImageIcon("weapons/autogun.png").getImage();
     private static transient Image drill = new ImageIcon("weapons/drill.png").getImage();
+    private static transient Image fabricator = new ImageIcon("weapons/fabricator.png").getImage();
+
     private int animation_frame = 0;
 
     private boolean colliding_up = false;
@@ -279,6 +281,9 @@ public class Player implements Serializable, Cloneable{
                 }
                 else if(held_item.id.equals("drill")){
                     b_img.getGraphics().drawImage(drill, 0, 0, null);
+                }
+                else if(held_item.id.equals("fabricator")){
+                    b_img.getGraphics().drawImage(fabricator, 0, 0, null);
                 }
             }
             g2.drawImage(b_img, rotOp, x + (centx - px) - 50, y + (centy - py) - 49);

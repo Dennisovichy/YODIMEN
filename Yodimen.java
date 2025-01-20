@@ -228,7 +228,20 @@ class GamePanel extends JPanel implements KeyListener, ActionListener, MouseList
     for(Projectile proj : display_info.projectiles){
       proj.draw(g, display_info.player_x, display_info.player_y, centerx, centery);
     }
-    display_info.game_map.draw(g, display_info.player_x, display_info.player_y, centerx, centery);
+
+    for (Tile tile : display_info.game_map) {
+      if(tile != null){
+        switch (tile.getType()) {
+          case 1 -> {g.setColor(new Color(255, 0, 255));}
+          case 2 -> {g.setColor(new Color(255, 255, 0));}
+          case 3 -> {g.setColor(new Color(0, 0, 255));}
+          case 4 -> {g.setColor(new Color(255, 0, 0));}
+        }
+        g.fillRect(tile.getX() + (centerx-display_info.player_x), tile.getY() + (centery-display_info.player_y), Map.tilesize, Map.tilesize);
+        g.drawRect(tile.getX() + (centerx-display_info.player_x), tile.getY() + (centery-display_info.player_y), Map.tilesize, Map.tilesize);
+      }
+    }
+
     int count = 0;
     for(Player play: display_info.players){
       if(play != null){

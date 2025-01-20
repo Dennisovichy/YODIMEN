@@ -14,8 +14,10 @@ class Projectile implements Serializable, Cloneable{
     float velocity_y;
     float face_angle;
 
-    int hitbox_size;
+    String id;
 
+    int hitbox_size;
+    int length;
     int collide_terrain;
     int collide_player;
     int damage;
@@ -32,10 +34,12 @@ class Projectile implements Serializable, Cloneable{
         y = starty;
         face_angle = angle;
         firer = fire;
+        id = type;
 
         if(type.equals("bullet_small")){
             hitbox_size = SMALL;
             speed = 10;
+            length = 50;
             lifetime = -1;
             affected_gravity = false;
             collide_terrain = FIZZLE;
@@ -45,6 +49,7 @@ class Projectile implements Serializable, Cloneable{
         if(type.equals("laser")){
             hitbox_size = SMALL;
             speed = 10;
+            length = 25;
             lifetime = 30;
             affected_gravity = false;
             collide_terrain = DAMAGE;
@@ -84,10 +89,20 @@ class Projectile implements Serializable, Cloneable{
     }
 
     public void draw(Graphics g, int px, int py, int camx, int camy){
-        g.setColor(Color.CYAN);
-        g.drawLine(display_x - (px-camx), display_y - (py-camy), display_x + (int)(Math.round((Math.cos(face_angle))*200.0)) - (px-camx), display_y + (int)(Math.round((Math.sin(face_angle))*200.0)) - (py-camy));
+        Graphics2D g2 = (Graphics2D) g;
+        if(id.equals("bullet_small")){
+            g2.setStroke(new BasicStroke(3));
+            g2.setColor(Color.YELLOW);
+        }
+        else if(id.equals("laser")){
+            g2.setStroke(new BasicStroke(7));
+            g2.setColor(Color.RED);
+        }
+        g2.drawLine(display_x - (px-camx), display_y - (py-camy), display_x + (int)(Math.round((Math.cos(face_angle))*length)) - (px-camx), display_y + (int)(Math.round((Math.sin(face_angle))*length)) - (py-camy));
+        g2.setStroke(new BasicStroke(1));
         Rectangle rec = getHitbox();
         g.drawRect(rec.x-(px-camx), rec.y-(py-camy), rec.width, rec.height);
+        
     }
 
     public Tile checkMapCollision(Map map){

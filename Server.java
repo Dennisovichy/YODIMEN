@@ -45,7 +45,7 @@ class ServerConnection extends JPanel
     
     private ArrayList<Projectile> projectile_list = new ArrayList<Projectile>();
     private ArrayList<Integer> delete_projectiles = new ArrayList<Integer>();
-    boolean proccessing_projectiles = false;
+    boolean deleting_projectiles = false;
 
     javax.swing.Timer timer;
     ServerConnection ref = this;
@@ -164,30 +164,34 @@ class ServerConnection extends JPanel
                             //System.out.println(player_objects[i].x);
                         }
                     }
-                }
+                } 
                 int index = 0;
-                for(Projectile bullet : projectile_list){
-                    bullet.update();
-                    if(bullet.checkPlayerCollision(player_objects) != null){
+                for(int i = 0; i < projectile_list.size(); i++){
+                    projectile_list.get(i).update();
+                    if(projectile_list.get(i).checkPlayerCollision(player_objects) != null){
                         //System.out.println("Collide player");
-                        delete_projectiles.add(index);
+                        delete_projectiles.add(i);
                     }
-                    else if(bullet.checkMapCollision(map) != null){
+                    else if(projectile_list.get(i).checkMapCollision(map) != null){
                         //System.out.println("Collide terrain");
-                        delete_projectiles.add(index);
+                        delete_projectiles.add(i);
                     }
-                    else if(bullet.lifetime == 0){
-                        delete_projectiles.add(index);
+                    else if(projectile_list.get(i).lifetime == 0){
+                        delete_projectiles.add(i);
                     }
                     index += 1;
                 }
 
+                deleting_projectiles = true;
                 map.update();
+                deleting_projectiles = false;
 
                 Collections.reverse(delete_projectiles);
+                deleting_projectiles = true;
                 for(int del : delete_projectiles){
                     projectile_list.remove(del);
                 }
+                deleting_projectiles = false;
                 delete_projectiles.clear();
                //draw
                repaint();
@@ -252,6 +256,7 @@ class ServerConnection extends JPanel
                             player_inventorys[id].addItem("pistol");
                             player_inventorys[id].addItem("autogun");
                             player_inventorys[id].addItem("drill");
+                            player_inventorys[id].addItem("fabricator");
                         }
                     }
                         player_inputs[id] = line;
@@ -296,16 +301,28 @@ class ServerConnection extends JPanel
                 }
             }
 
+            
             Tile[] cendy = new Tile[map.build_map.size()];
             for(int i = 0; i < map.build_map.size(); i++){
                 try {
-                    cendy[i] = (Tile)map.build_map.clone();
-                } catch (Exception e) {
+                    cendy[i] = (Tile)map.build_map.get(i).clone();
+                } catch (CloneNotSupportedException e) {
                 }
             }
+            
+            /*
             map.build_map = (ArrayList<Tile>)map.build_map.clone();
+            Map wth = map;
+            try{
+            wth = (Map)map.clone();
+            }
+            catch(CloneNotSupportedException t){
+
+            }
+            */
             
             Projectile[] bendy = new Projectile[projectile_list.size()];
+            
             for(int i = 0; i < projectile_list.size(); i++){
                 try{
                 bendy[i] = (Projectile)projectile_list.get(i).clone();
@@ -314,15 +331,16 @@ class ServerConnection extends JPanel
 
                 }
             }
+            
 
             DisplayPacket send = null;
             try{
                 player_inventorys[id].hotbar = player_inventorys[id].hotbar.clone();
                 if(player_objects[id] != null){
-                    send = new DisplayPacket(player_objects[id].x, player_objects[id].y, (Map)map.clone(), sendy, (Inventory)player_inventorys[id].clone(), bendy);
+                    send = new DisplayPacket(player_objects[id].x, player_objects[id].y, cendy, sendy, (Inventory)player_inventorys[id].clone(), bendy);
                 }
                 else{
-                    send = new DisplayPacket(map.default_camx, map.default_camy, (Map)map.clone(), sendy, (Inventory)player_inventorys[id].clone(), bendy);
+                    send = new DisplayPacket(map.default_camx, map.default_camy, cendy, sendy, (Inventory)player_inventorys[id].clone(), bendy);
                 }
             }
             catch(Exception e){
@@ -330,9 +348,13 @@ class ServerConnection extends JPanel
             }
 
             try {
-                
+                try{
                 outputs[id].writeObject(send);
                 outputs[id].flush();
+                }
+                catch(ConcurrentModificationException p){
+                    System.out.println("End times");
+                }
             
                 //send_turn[id] = false;
             } 
