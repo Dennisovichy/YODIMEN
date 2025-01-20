@@ -148,7 +148,8 @@ class GamePanel extends JPanel implements KeyListener, ActionListener, MouseList
     if(screen == INTRO){
     menu.checkScreen(mousex, mousey);
     if(menu.current_screen.game){
-      String address = "127.0.0.1";//JOptionPane.showInputDialog("Enter server address");
+      //String address = "127.0.0.1";
+      String address = JOptionPane.showInputDialog("Enter server address");
       int port = Integer.parseInt(JOptionPane.showInputDialog("Enter port number"));
       try {
           Socket test = new Socket(address, port);
