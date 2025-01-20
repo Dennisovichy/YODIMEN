@@ -44,11 +44,16 @@ class ServerConnection extends JPanel
     private Inventory[] player_inventorys = {null, null, null, null};
     
     private ArrayList<Projectile> projectile_list = new ArrayList<Projectile>();
+    private ArrayList<Integer> delete_projectiles = new ArrayList<Integer>();
+    boolean proccessing_projectiles = false;
 
     javax.swing.Timer timer;
     ServerConnection ref = this;
 
     Map map = new Map();
+    int[] blu_spawn = {300, 400};
+    int[] red_spawn = {300, 400};
+    Match match = new Match(blu_spawn, red_spawn, player_objects);
     public static final int screenwidth = 800;
     public static final int screenheight = 780;
     // constructor with port
@@ -57,7 +62,6 @@ class ServerConnection extends JPanel
         setPreferredSize(new Dimension(screenwidth, screenheight));
         //setFocusable(true);
         // starts server and waits for a connection
-        projectile_list.add(new Projectile(300, 400, (float)Math.toRadians(-3), "bullet_small"));
         try
         {
             for(int i = 0; i<4; i++){
@@ -112,15 +116,22 @@ class ServerConnection extends JPanel
                 } 
                }
                //update the server state
+               match.update();
                 for(int i = 0; i < 4; i++){
                     if(player_objects[i] != null){
+                        if(player_objects[i].health <= 0){
+                            player_objects[i].dead = true;
+                        }
                         if(player_inventorys[i] != null){
                             player_inventorys[i].updateSlots();
+                            player_objects[i].held_item = player_inventorys[i].hotbar[player_objects[i].holding_slot];
                         }
                         if(player_inputs[i] != null){
                             if(player_inputs[i].keys != null){
-                                player_objects[i].checkInput(player_inputs[i].keys);
-                                player_objects[i].updateLookPos(player_inputs[i].mousex_offset, player_inputs[i].mousey_offset);
+                                if(!player_objects[i].dead){
+                                    player_objects[i].checkInput(player_inputs[i].keys);
+                                    player_objects[i].updateLookPos(player_inputs[i].mousex_offset, player_inputs[i].mousey_offset);
+                                }
                             }
                             if(player_inputs[i].inventory_swap_request != null){
                                 if(player_inputs[i].inventory_swap_request[0] != -1 || player_inputs[i].inventory_swap_request[1] != -1){
@@ -134,10 +145,13 @@ class ServerConnection extends JPanel
                             if(player_inputs[i].mouse_pressed){
                                 if(player_inventorys[i].hotbar[player_objects[i].holding_slot] != null){
                                     if(player_inventorys[i].hotbar[player_objects[i].holding_slot].cooldown_counter == player_inventorys[i].hotbar[player_objects[i].holding_slot].cooldown){
-                                        if(player_inventorys[i].hotbar[player_objects[i].holding_slot].id.equals("pistol")){
+                                        if(player_inventorys[i].hotbar[player_objects[i].holding_slot].id.equals("pistol") || player_inventorys[i].hotbar[player_objects[i].holding_slot].id.equals("autogun")){
 
-                                            projectile_list.add(new Projectile(player_objects[i].x, player_objects[i].y, (float)(Math.atan2((float)player_inputs[i].mousey_offset,(float)player_inputs[i].mousex_offset) + Math.PI), "bullet_small"));
-                                            System.out.println("poundington");
+                                            projectile_list.add(new Projectile(player_objects[i].x, player_objects[i].y, (float)(Math.atan2((float)player_inputs[i].mousey_offset,(float)player_inputs[i].mousex_offset) + Math.PI), "bullet_small", player_objects[i]));
+                                            //System.out.println("poundington");
+                                        }
+                                        if(player_inventorys[i].hotbar[player_objects[i].holding_slot].id.equals("drill")){
+                                            projectile_list.add(new Projectile(player_objects[i].x, player_objects[i].y, (float)(Math.atan2((float)player_inputs[i].mousey_offset,(float)player_inputs[i].mousex_offset) + Math.PI), "laser", player_objects[i]));
                                         }
                                         player_inventorys[i].hotbar[player_objects[i].holding_slot].cooldown_counter = 0;
                                         player_inventorys[i].hotbar[player_objects[i].holding_slot].uses_counter++;
@@ -151,15 +165,30 @@ class ServerConnection extends JPanel
                         }
                     }
                 }
+                int index = 0;
                 for(Projectile bullet : projectile_list){
                     bullet.update();
                     if(bullet.checkPlayerCollision(player_objects) != null){
-                        System.out.println("Collide player");
+                        //System.out.println("Collide player");
+                        delete_projectiles.add(index);
                     }
-                    if(bullet.checkMapCollision(map) != null){
-                        System.out.println("Collide terrain");
+                    else if(bullet.checkMapCollision(map) != null){
+                        //System.out.println("Collide terrain");
+                        delete_projectiles.add(index);
                     }
+                    else if(bullet.lifetime == 0){
+                        delete_projectiles.add(index);
+                    }
+                    index += 1;
                 }
+
+                map.update();
+
+                Collections.reverse(delete_projectiles);
+                for(int del : delete_projectiles){
+                    projectile_list.remove(del);
+                }
+                delete_projectiles.clear();
                //draw
                repaint();
                
@@ -213,9 +242,16 @@ class ServerConnection extends JPanel
                     if(player_objects[id] == null){
                         System.out.println(line.decision_made);
                         if(line.decision_made == true){
-                            player_objects[id] = new Player(300, 400, line.red_team);
+                            if(line.red_team){
+                                player_objects[id] = new Player(red_spawn[0], red_spawn[1], line.red_team);
+                            }
+                            else{
+                                player_objects[id] = new Player(blu_spawn[0], blu_spawn[1], line.red_team);
+                            }
                             player_inventorys[id] = new Inventory();
                             player_inventorys[id].addItem("pistol");
+                            player_inventorys[id].addItem("autogun");
+                            player_inventorys[id].addItem("drill");
                         }
                     }
                         player_inputs[id] = line;
@@ -230,7 +266,7 @@ class ServerConnection extends JPanel
             }
             catch(IOException i)
             {
-                    connection_status[id] = false;
+                    checkers[id].running = false;
                     System.out.println("SEIU");
                     //socket.close();
                     //in.close(); 
@@ -259,13 +295,22 @@ class ServerConnection extends JPanel
                 }
                 }
             }
+
+            Tile[] cendy = new Tile[map.build_map.size()];
+            for(int i = 0; i < map.build_map.size(); i++){
+                try {
+                    cendy[i] = (Tile)map.build_map.clone();
+                } catch (Exception e) {
+                }
+            }
+            map.build_map = (ArrayList<Tile>)map.build_map.clone();
             
             Projectile[] bendy = new Projectile[projectile_list.size()];
             for(int i = 0; i < projectile_list.size(); i++){
                 try{
                 bendy[i] = (Projectile)projectile_list.get(i).clone();
                 }
-                catch(CloneNotSupportedException e){
+                catch(Exception e){
 
                 }
             }
@@ -285,8 +330,10 @@ class ServerConnection extends JPanel
             }
 
             try {
+                
                 outputs[id].writeObject(send);
                 outputs[id].flush();
+            
                 //send_turn[id] = false;
             } 
             catch(IOException e){
@@ -329,6 +376,7 @@ class ConnectionWaiter extends Thread{
 class ConnectionChecker extends Thread{
     int inte;
     ServerConnection laziness;
+    boolean running = true;
 
     public ConnectionChecker(int bint, ServerConnection lazy){
         this.inte = bint;
@@ -337,7 +385,7 @@ class ConnectionChecker extends Thread{
 
     @Override
     public void run(){
-        while (true) { 
+        while (running) { 
             this.laziness.sendClientDisplay(this.inte);
             this.laziness.checkInput(this.inte);
         }

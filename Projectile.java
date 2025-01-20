@@ -19,23 +19,36 @@ class Projectile implements Serializable, Cloneable{
     int collide_terrain;
     int collide_player;
     int damage;
+    int lifetime;
+    Player firer;
 
     Image sprite;
 
     boolean affected_gravity;
 
-    public Projectile(int startx, int starty, float angle, String type){
+    public Projectile(int startx, int starty, float angle, String type, Player fire){
         int speed = 7;
         x = startx;
         y = starty;
         face_angle = angle;
+        firer = fire;
 
         if(type.equals("bullet_small")){
             hitbox_size = SMALL;
             speed = 10;
+            lifetime = -1;
             affected_gravity = false;
             collide_terrain = FIZZLE;
             collide_player = DAMAGE;
+            damage = 7;
+        }
+        if(type.equals("laser")){
+            hitbox_size = SMALL;
+            speed = 10;
+            lifetime = 30;
+            affected_gravity = false;
+            collide_terrain = DAMAGE;
+            collide_player = FIZZLE;
             damage = 7;
         }
 
@@ -58,6 +71,9 @@ class Projectile implements Serializable, Cloneable{
         y = y + velocity_y;
         display_x = Math.round(x);
         display_y = Math.round(y);
+        if(lifetime > 0){
+            lifetime -= 1;
+        }
     }
 
     public void draw(Graphics g){
@@ -79,6 +95,9 @@ class Projectile implements Serializable, Cloneable{
         for(Tile tile : map.build_map){
             if(tile != null){
                 if(tile.getHitbox().intersects(rect)){
+                    if(collide_terrain == DAMAGE){
+                        tile.health -= damage;
+                    }
                     return tile;
                 }
             }
@@ -89,8 +108,13 @@ class Projectile implements Serializable, Cloneable{
     public Player checkPlayerCollision(Player[] players){
         for(Player check: players){
             if(check != null){
-                if(check.getHitbox().intersects(getHitbox())){
-                    return check;
+                if(!check.equals(firer)){
+                    if(check.getHitbox().intersects(getHitbox())){
+                        if(collide_player == DAMAGE){
+                            check.health -= damage;
+                        }
+                        return check;
+                    }
                 }
             }
         }

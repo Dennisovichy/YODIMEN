@@ -1,3 +1,4 @@
 -Need to make the whole game now
-1. Guns for them to shoot each other
-2. Proper maps and spawnpoints (More tile types, map editor)
+1. More types of weapons (and projectiles)
+2. More types of tiles
+3.

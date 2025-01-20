@@ -1,11 +1,13 @@
 import java.awt.*;
 import java.io.Serializable;
 
-class Tile implements Serializable{
+class Tile implements Serializable, Cloneable{
     private int x;
     private int y;
     private int type;
     private Image image;
+
+    public int health = 30;
     private boolean[] collision = {true, true};
     private Rectangle hitbox;
     
@@ -14,6 +16,12 @@ class Tile implements Serializable{
       this.y = y;
       this.type = type;
       
+    }
+
+    @Override
+    public Object clone() throws CloneNotSupportedException{
+        Tile temp = (Tile)super.clone();
+        return temp;
     }
 
     public int getType(){return this.type;}

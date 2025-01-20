@@ -1,6 +1,9 @@
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.geom.AffineTransform;
+import java.awt.image.*;
 import java.io.Serializable;
+import javax.swing.*;
 
 class BaseEntity{
     private int x;
@@ -32,7 +35,23 @@ public class Player implements Serializable, Cloneable{
 
     public boolean red_team;
 
+    public int health = 100;
+    public boolean dead = false;
     public int holding_slot = 0;
+
+    public Item held_item = null;
+
+    private static transient Image[] bluewalks = {new ImageIcon("blue team sprites/blueteamwalk1.png").getImage(),new ImageIcon("blue team sprites/blueteamwalk2.png").getImage(),new ImageIcon("blue team sprites/blueteamwalk3.png").getImage(),new ImageIcon("blue team sprites/blueteamwalk4.png").getImage()};
+    private static transient Image blueteamjumps = new ImageIcon("blue team sprites/blueteamjump.png").getImage();
+    private static transient Image[] redwalks = {new ImageIcon("red team sprites/redteamwalk1.png").getImage(),new ImageIcon("red team sprites/redteamwalk2.png").getImage(),new ImageIcon("red team sprites/redteamwalk3.png").getImage(),new ImageIcon("red team sprites/redteamwalk4.png").getImage()};
+    private static transient Image redteamjumps = new ImageIcon("red team sprites/redteamjump.png").getImage();
+    private static transient Image corpse = new ImageIcon("blue team sprites/yodicorpse.png").getImage();
+
+    private static transient Image eye = new ImageIcon("blue team sprites/eye.png").getImage();
+    private static transient Image pistol = new ImageIcon("weapons/pistol.png").getImage();
+    private static transient Image autogun = new ImageIcon("weapons/autogun.png").getImage();
+    private static transient Image drill = new ImageIcon("weapons/drill.png").getImage();
+    private int animation_frame = 0;
 
     private boolean colliding_up = false;
     private boolean colliding_down = false;
@@ -57,6 +76,7 @@ public class Player implements Serializable, Cloneable{
     public void updateLookPos(int offsetx, int offsety){
         this.lookat_x = this.x - offsetx;
         this.lookat_y = this.y - offsety;
+        this.lookat_angle = (float)(Math.atan2((float)offsetx,(float)offsety) + Math.PI);
     }
 
     public Rectangle getHitbox(){
@@ -70,19 +90,24 @@ public class Player implements Serializable, Cloneable{
     //down
     Rectangle[] output = {new Rectangle(x - (width/2) - collidebox_outset, y - (height/2) + (collidebox_depth-collidebox_outset), collidebox_depth, height-(2*(collidebox_depth-collidebox_outset)))
         ,new Rectangle(x + (width/2) - (collidebox_depth-collidebox_outset), y - (height/2) + (collidebox_depth-collidebox_outset), collidebox_depth, height-(2*(collidebox_depth-collidebox_outset)))
-        ,new Rectangle(x - (width/2) - collidebox_outset, y - (height/2) - collidebox_outset, width + (2*(collidebox_depth-collidebox_outset)), collidebox_depth)
-        ,new Rectangle(x - (width/2) - collidebox_outset, y + (height/2) - (collidebox_depth-collidebox_outset), width + (2*(collidebox_depth-collidebox_outset)), collidebox_depth)
+        ,new Rectangle(x - (width/2) - collidebox_outset/2, y - (height/2) - collidebox_outset, width + (1*(collidebox_depth-collidebox_outset)), collidebox_depth)
+        ,new Rectangle(x - (width/2) - collidebox_outset/2, y + (height/2) - (collidebox_depth-collidebox_outset), width + (1*(collidebox_depth-collidebox_outset)), collidebox_depth)
         };
         return output;
     }
 
     public void checkInput(boolean[] keys){
         movement_x = 0;
-        if(keys[KeyEvent.VK_A]){
-            movement_x = -5;
+        if(keys[KeyEvent.VK_A] && keys[KeyEvent.VK_D]){
+            movement_x = 0;
         }
-        if(keys[KeyEvent.VK_D]){
+        else if(keys[KeyEvent.VK_A]){
+            movement_x = -5;
+            animation_frame += 1;
+        }
+        else if(keys[KeyEvent.VK_D]){
             movement_x = 5;
+            animation_frame -= 1;
         }
         if(keys[KeyEvent.VK_W]){
             if(colliding_down){
@@ -179,6 +204,9 @@ public class Player implements Serializable, Cloneable{
             if(!colliding_up){
                 y = y + movement_y;
             }
+            else{
+                movement_y = 0;
+            }
         }
         if(movement_y > 0){
             if(!colliding_down){
@@ -205,19 +233,75 @@ public class Player implements Serializable, Cloneable{
 
     public void draw(Graphics g, int px, int py, int centx, int centy){
         Graphics2D g2 = (Graphics2D)g;
-        if(red_team){
-            g2.setColor(Color.RED);
+        System.out.println(health);
+
+        int draw_x = x - (width/2) + (centx - px) - 2;
+        int draw_y = y - (height/2) + (centy - py) - 4;
+
+        if(dead){
+            g.drawImage(corpse, draw_x, draw_y, null);
         }
         else{
-            g2.setColor(Color.BLUE);
+            AffineTransform rot = new AffineTransform();
+            rot.rotate(-lookat_angle - (Math.PI/2), 6, 6);
+            AffineTransformOp rotOp = new AffineTransformOp(rot, AffineTransformOp.TYPE_BILINEAR);
+
+            if(red_team){
+                if(!colliding_down){
+                    g.drawImage(redteamjumps, draw_x, draw_y, null);
+                }
+                else{
+                    g.drawImage(redwalks[translateToArray(animation_frame)], draw_x, draw_y, null);
+                }
+            }
+            else{
+                if(!colliding_down){
+                    g.drawImage(blueteamjumps, draw_x, draw_y, null);
+                }
+                else{
+                    g.drawImage(bluewalks[translateToArray(animation_frame)], draw_x, draw_y, null);
+                }
+            }
+            BufferedImage b_img = new BufferedImage(eye.getWidth(null), eye.getHeight(null), BufferedImage.TYPE_4BYTE_ABGR);
+            b_img.getGraphics().drawImage(eye, 0, 0, null);
+            g2.drawImage(b_img, rotOp, x + (centx - px) - 6, y + (centy - py) - 25);
+
+            rot = new AffineTransform();
+            rot.rotate(-lookat_angle - (Math.PI/2), 50, 50);
+            rotOp = new AffineTransformOp(rot, AffineTransformOp.TYPE_BILINEAR);
+            b_img = new BufferedImage(100, 100, BufferedImage.TYPE_4BYTE_ABGR);
+            if(held_item != null){
+                if(held_item.id.equals("pistol")){
+                    b_img.getGraphics().drawImage(pistol, 0, 0, null);
+                }
+                else if(held_item.id.equals("autogun")){
+                    b_img.getGraphics().drawImage(autogun, 0, 0, null);
+                }
+                else if(held_item.id.equals("drill")){
+                    b_img.getGraphics().drawImage(drill, 0, 0, null);
+                }
+            }
+            g2.drawImage(b_img, rotOp, x + (centx - px) - 50, y + (centy - py) - 49);
         }
-        g2.fillRect(x - (width/2) + (centx - px), y - (height/2) + (centy - py), width, height);
-        //g2.fillRect(300 - (x - px) - (width/2),400 - (y - py) - (height/2), width, height);
-        //System.out.println(x);
+
         g2.setColor(Color.BLACK);
         Rectangle[] drawthese = getCollideBoxes();
         for(Rectangle draw : drawthese){
             g2.drawRect(draw.x + (centx - px), draw.y + (centy - py), draw.width, draw.height);
         }
+        
+    }
+
+    private int translateToArray(int frame){
+        if(frame > 0){
+            return frame % bluewalks.length; //4, 0 [] 3, 3 [] 5, 1
+        }
+        if(frame < 0){
+            if(((-1 * frame) % bluewalks.length) == 0){
+                return 0;
+            }
+            return 4 - ((-1 * frame) % bluewalks.length);   //-1, 3 [] -2, 2[] -3, 1   -4, 0     -5, 3
+        }
+        return 0;
     }
 }

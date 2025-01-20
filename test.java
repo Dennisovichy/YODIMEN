@@ -217,7 +217,8 @@ class GameP extends JPanel implements KeyListener, ActionListener, MouseListener
         for(int i = 0; i < (widthy/Map.tilesize + 5); i++){
           g.drawLine(0, ((0 - camy) % Map.tilesize) + i*Map.tilesize, widthx,  ((0 - camy) % Map.tilesize) + i*Map.tilesize);
         }
-
+        g.setColor(Color.YELLOW);
+        g.fillRect(300 + (0 - camx), 420 + (0 - camy), Map.tilesize, Map.tilesize);
         for (Tile tile : this.map.build_map) {
             switch (tile.getType()) {
               case 1 -> {g.setColor(new Color(255, 0, 255));}

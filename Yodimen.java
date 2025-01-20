@@ -144,48 +144,50 @@ class GamePanel extends JPanel implements KeyListener, ActionListener, MouseList
 
  @Override
  public void mousePressed(MouseEvent e){
-  if(screen == INTRO){
-   menu.checkScreen(mousex, mousey);
-   if(menu.current_screen.game){
-    String address = "127.0.0.1";//JOptionPane.showInputDialog("Enter server address");
-    int port = Integer.parseInt(JOptionPane.showInputDialog("Enter port number"));
-    try {
-        Socket test = new Socket(address, port);
-        client = new YodiClient(test);
-        spamming = new SpamSocket(client, keys, this);
-        //client.sendInfoToServer(keys, counter, mousex_offset, mousey_offset, mouse_pressed);
-        //client.sendInfoToServer(true, false);
-        //spamming.start();
-        screen = CHOOSE;
-    } catch (Exception er) {
-      System.out.println("caught");
-      menu.goBackScreen();
-    }
-    
-   }
-  }
-  if(screen == CHOOSE){
+  if(e.getButton() == MouseEvent.BUTTON1){
+    if(screen == INTRO){
     menu.checkScreen(mousex, mousey);
-   if(menu.current_screen == menu.red_team){
-    client.sendInfoToServer(true, true);
-    spamming.start();
-    screen = GAME;
-   }
-   if(menu.current_screen == menu.blue_team){
-    client.sendInfoToServer(true, false);
-    spamming.start();
-    screen = GAME;
-   }
-  } 
-  if(screen == GAME){
-    mouse_pressed = true;
-    if(!holding_item){
-      if(display_info != null){
-        if(display_info.inventory != null){
-          held = display_info.inventory.selectItem(centerx, getHeight(), mousex, mousey);
-          if(held != null){
-            holding_item = true;
-            item_start = display_info.inventory.getSlot(centerx, getHeight(), mousex, mousey);
+    if(menu.current_screen.game){
+      String address = "127.0.0.1";//JOptionPane.showInputDialog("Enter server address");
+      int port = Integer.parseInt(JOptionPane.showInputDialog("Enter port number"));
+      try {
+          Socket test = new Socket(address, port);
+          client = new YodiClient(test);
+          spamming = new SpamSocket(client, keys, this);
+          //client.sendInfoToServer(keys, counter, mousex_offset, mousey_offset, mouse_pressed);
+          //client.sendInfoToServer(true, false);
+          //spamming.start();
+          screen = CHOOSE;
+      } catch (Exception er) {
+        System.out.println("caught");
+        menu.goBackScreen();
+      }
+      
+    }
+    }
+    if(screen == CHOOSE){
+      menu.checkScreen(mousex, mousey);
+    if(menu.current_screen == menu.red_team){
+      client.sendInfoToServer(true, true);
+      spamming.start();
+      screen = GAME;
+    }
+    if(menu.current_screen == menu.blue_team){
+      client.sendInfoToServer(true, false);
+      spamming.start();
+      screen = GAME;
+    }
+    } 
+    if(screen == GAME){
+      mouse_pressed = true;
+      if(!holding_item){
+        if(display_info != null){
+          if(display_info.inventory != null){
+            held = display_info.inventory.selectItem(centerx, getHeight(), mousex, mousey);
+            if(held != null){
+              holding_item = true;
+              item_start = display_info.inventory.getSlot(centerx, getHeight(), mousex, mousey);
+            }
           }
         }
       }
@@ -195,17 +197,19 @@ class GamePanel extends JPanel implements KeyListener, ActionListener, MouseList
 
  @Override
  public void mouseReleased(MouseEvent e){
-  if(screen == GAME){
-    mouse_pressed = false;
-    if(holding_item){
-      int end_point = display_info.inventory.getSlot(centerx, getHeight(), mousex, mousey);
-      if(end_point != -1){
-        swap_request[0] = item_start;
-        swap_request[1] = end_point;
-        spamming.make_swapRequest = true;
+  if(e.getButton() == MouseEvent.BUTTON1){
+    if(screen == GAME){
+      mouse_pressed = false;
+      if(holding_item){
+        int end_point = display_info.inventory.getSlot(centerx, getHeight(), mousex, mousey);
+        if(end_point != -1){
+          swap_request[0] = item_start;
+          swap_request[1] = end_point;
+          spamming.make_swapRequest = true;
+        }
+        holding_item = false;
+        held = null;
       }
-      holding_item = false;
-      held = null;
     }
   }
  }
@@ -348,6 +352,9 @@ class YodiClient{
         catch(IOException e){
           System.out.println(e);
         }
+        catch(ConcurrentModificationException i){
+          System.out.println("pounding");
+        }
       }
     }
 
@@ -412,6 +419,3 @@ class SpamSocket extends Thread{
     }
   }
 }
-
-
-

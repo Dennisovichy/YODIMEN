@@ -40,6 +40,22 @@ class Map implements Serializable, Cloneable{
     }
   }
 
+
+  public void update(){
+    ArrayList<Integer> delete_tiles = new ArrayList<>();
+    for(int i = 0; i < build_map.size(); i++){
+      if(build_map.get(i).health <= 0){
+        System.out.println(build_map.get(i).health);
+        delete_tiles.add(i);
+      }
+    }
+    Collections.reverse(delete_tiles);
+    for(int kill: delete_tiles){
+      build_map.remove(kill);
+    }
+  }
+  
+
   @Override
     public Object clone() throws CloneNotSupportedException{
         Map temp = (Map)super.clone();

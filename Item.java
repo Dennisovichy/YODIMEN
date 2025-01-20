@@ -23,6 +23,18 @@ class Item implements Serializable{
             reload_cooldown = 300;
             total_usetimes = -1;
         }
+        if(name.equals("autogun")){
+            cooldown = 8;
+            use_times = 30;
+            reload_cooldown = 400;
+            total_usetimes = -1;
+        }
+        if(name.equals("drill")){
+            cooldown = 1;
+            use_times = 1;
+            reload_cooldown = 0;
+            total_usetimes = -1;
+        }
     }
 
     public void update(){
