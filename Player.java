@@ -235,7 +235,7 @@ public class Player implements Serializable, Cloneable{
 
     public void draw(Graphics g, int px, int py, int centx, int centy){
         Graphics2D g2 = (Graphics2D)g;
-        System.out.println(health);
+        //System.out.println(health);
 
         int draw_x = x - (width/2) + (centx - px) - 2;
         int draw_y = y - (height/2) + (centy - py) - 4;
