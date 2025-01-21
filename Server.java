@@ -42,6 +42,7 @@ class ServerConnection extends JPanel
     public InputPacket[] player_inputs = {null,null,null,null};
     private Player[] player_objects = {null,null,null,null};
     private Inventory[] player_inventorys = {null, null, null, null};
+    private int[][] last_swap_request = {{-1,-1},{-1,-1},{-1,-1},{-1,-1}};
     
     private ArrayList<Projectile> projectile_list = new ArrayList<Projectile>();
     private ArrayList<Integer> delete_projectiles = new ArrayList<Integer>();
@@ -53,7 +54,9 @@ class ServerConnection extends JPanel
     Map map = new Map();
     int[] blu_spawn = {300, 400};
     int[] red_spawn = {300, 400};
-    Match match = new Match(blu_spawn, red_spawn, player_objects);
+    int[] blu_core = {-253, 456};
+    int[] red_core = {-174, 456};
+    Match match = new Match(blu_spawn, red_spawn, player_objects, blu_core, red_core, map);
     public static final int screenwidth = 800;
     public static final int screenheight = 780;
     // constructor with port
@@ -67,6 +70,7 @@ class ServerConnection extends JPanel
             for(int i = 0; i<4; i++){
                 servers[i] = new ServerSocket(0);
                 servers[i].setPerformancePreferences(0, 1, 0);
+                servers[i].setReceiveBufferSize(100000);
                 System.out.println(servers[i].getLocalPort());
             }
             //server = new ServerSocket(port);
@@ -116,9 +120,17 @@ class ServerConnection extends JPanel
                 } 
                }
                //update the server state
-               match.update();
+               try{
+               match.update((Map)map.clone());
+               }
+               catch(Exception br){
+
+               }
                 for(int i = 0; i < 4; i++){
                     if(player_objects[i] != null){
+                        if(player_objects[i].y > 5000){
+                            player_objects[i].health = 0;
+                        }
                         if(player_objects[i].health <= 0){
                             player_objects[i].dead = true;
                         }
@@ -134,30 +146,34 @@ class ServerConnection extends JPanel
                                 }
                             }
                             if(player_inputs[i].inventory_swap_request != null){
+                                if(player_inputs[i].inventory_swap_request != (last_swap_request[i])){
+                                    player_inventorys[i].swapSlots(player_inputs[i].inventory_swap_request);
+                                }
                                 if(player_inputs[i].inventory_swap_request[0] != -1 || player_inputs[i].inventory_swap_request[1] != -1){
                                     player_inventorys[i].acknowledge_swap = true;
                                 }
                                 if(player_inputs[i].inventory_swap_request[0] == -1 && player_inputs[i].inventory_swap_request[1] == -1){
                                     player_inventorys[i].acknowledge_swap = false;
                                 }
-                                player_inventorys[i].swapSlots(player_inputs[i].inventory_swap_request);
                             }
                             if(player_inputs[i].mouse_pressed){
-                                if(player_inventorys[i].hotbar[player_objects[i].holding_slot] != null){
-                                    if(player_inventorys[i].hotbar[player_objects[i].holding_slot].cooldown_counter == player_inventorys[i].hotbar[player_objects[i].holding_slot].cooldown){
-                                        if(player_inventorys[i].hotbar[player_objects[i].holding_slot].id.equals("pistol") || player_inventorys[i].hotbar[player_objects[i].holding_slot].id.equals("autogun")){
+                                if(!player_objects[i].dead){
+                                    if(player_inventorys[i].hotbar[player_objects[i].holding_slot] != null){
+                                        if(player_inventorys[i].hotbar[player_objects[i].holding_slot].cooldown_counter == player_inventorys[i].hotbar[player_objects[i].holding_slot].cooldown){
+                                            if(player_inventorys[i].hotbar[player_objects[i].holding_slot].id.equals("pistol") || player_inventorys[i].hotbar[player_objects[i].holding_slot].id.equals("autogun")){
 
-                                            projectile_list.add(new Projectile(player_objects[i].x, player_objects[i].y, (float)(Math.atan2((float)player_inputs[i].mousey_offset,(float)player_inputs[i].mousex_offset) + Math.PI), "bullet_small", player_objects[i]));
-                                            //System.out.println("poundington");
+                                                projectile_list.add(new Projectile(player_objects[i].x, player_objects[i].y, (float)(Math.atan2((float)player_inputs[i].mousey_offset,(float)player_inputs[i].mousex_offset) + Math.PI), "bullet_small", player_objects[i]));
+                                                //System.out.println("poundington");
+                                            }
+                                            if(player_inventorys[i].hotbar[player_objects[i].holding_slot].id.equals("drill")){
+                                                projectile_list.add(new Projectile(player_objects[i].x, player_objects[i].y, (float)(Math.atan2((float)player_inputs[i].mousey_offset,(float)player_inputs[i].mousex_offset) + Math.PI), "laser", player_objects[i]));
+                                            }
+                                            if(player_inventorys[i].hotbar[player_objects[i].holding_slot].id.equals("fabricator")){
+                                                projectile_list.add(new Projectile(player_objects[i].x, player_objects[i].y, (float)(Math.atan2((float)player_inputs[i].mousey_offset,(float)player_inputs[i].mousex_offset) + Math.PI), "grenade", player_objects[i]));
+                                            }
+                                            player_inventorys[i].hotbar[player_objects[i].holding_slot].cooldown_counter = 0;
+                                            player_inventorys[i].hotbar[player_objects[i].holding_slot].uses_counter++;
                                         }
-                                        if(player_inventorys[i].hotbar[player_objects[i].holding_slot].id.equals("drill")){
-                                            projectile_list.add(new Projectile(player_objects[i].x, player_objects[i].y, (float)(Math.atan2((float)player_inputs[i].mousey_offset,(float)player_inputs[i].mousex_offset) + Math.PI), "laser", player_objects[i]));
-                                        }
-                                        if(player_inventorys[i].hotbar[player_objects[i].holding_slot].id.equals("fabricator")){
-                                            projectile_list.add(new Projectile(player_objects[i].x, player_objects[i].y, (float)(Math.atan2((float)player_inputs[i].mousey_offset,(float)player_inputs[i].mousex_offset) + Math.PI), "grenade", player_objects[i]));
-                                        }
-                                        player_inventorys[i].hotbar[player_objects[i].holding_slot].cooldown_counter = 0;
-                                        player_inventorys[i].hotbar[player_objects[i].holding_slot].uses_counter++;
                                     }
                                 }
                             }
@@ -185,19 +201,25 @@ class ServerConnection extends JPanel
                     index += 1;
                 }
 
-                deleting_projectiles = true;
+            
                 map.update();
-                deleting_projectiles = false;
 
                 Collections.reverse(delete_projectiles);
-                deleting_projectiles = true;
+               
+                for(int del : delete_projectiles){
+                    if(projectile_list.get(del).id.equals("grenade")){
+                        for(int i = 0; i < 40; i++){
+                            projectile_list.add(new Projectile(projectile_list.get(del).display_x, projectile_list.get(del).display_y, (float)(Math.toRadians(i*(360/40))), "explosion", null));
+                        }
+                    }
+                }
                 for(int del : delete_projectiles){
                     projectile_list.remove(del);
                 }
-                deleting_projectiles = false;
+                
                 delete_projectiles.clear();
                //draw
-               //repaint();
+               repaint();
                
             }
         };
@@ -272,10 +294,16 @@ class ServerConnection extends JPanel
                 //System.out.println(line);
  
             }
-            catch(IOException i)
+            catch(IOException ip)
             {
                     checkers[id].running = false;
+                    checkers[id] = null;
                     System.out.println("SEIU");
+                    connection_status[id] = false;
+                    player_objects[id] = null;
+                    player_inputs[id] = null;
+                    waiters[id] = new ConnectionWaiter(servers[id]);
+                    waiters[id].start();
                     //socket.close();
                     //in.close(); 
             }
@@ -354,7 +382,7 @@ class ServerConnection extends JPanel
             
             try{
             outputs[id].writeObject(send);
-            outputs[id].flush();
+            //outputs[id].flush();
             }
             catch(Exception e){
                 System.out.println("357:" + e);

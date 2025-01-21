@@ -104,6 +104,7 @@ class GameP extends JPanel implements KeyListener, ActionListener, MouseListener
     }
 
     if(holding_left){
+      //System.out.println((mousex + camx) + "," + (mousey + camy));
       boolean occupied = false;// flag to check if this space already has a tile
         for (Tile tile : this.map.build_map){
           if (tile.getHitbox().contains(mousex + camx, mousey + camy)){// check if the mouse is colliding with any of the tiles to avoid two tiles inhabiting the same space
@@ -126,7 +127,7 @@ class GameP extends JPanel implements KeyListener, ActionListener, MouseListener
           else{
             posy = ((mousey + camy) / Map.tilesize) - 1;
           }
-          this.map.build_map.add(new Tile((posx) * Map.tilesize, (posy) * Map.tilesize, this.selected_type, ""));// adding a new tile at the mouse if there is no preexisting tile
+          this.map.build_map.add(new Tile((posx) * Map.tilesize, (posy) * Map.tilesize, this.selected_type, null, health));// adding a new tile at the mouse if there is no preexisting tile
         }
     }
     if(holding_right){

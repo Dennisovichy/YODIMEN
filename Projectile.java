@@ -59,12 +59,22 @@ class Projectile implements Serializable, Cloneable{
         if(type.equals("grenade")){
             hitbox_size = MEDIUM;
             speed = 10;
-            length = 8;
+            length = 16;
             lifetime = 2000;
             affected_gravity = true;
             collide_terrain = EXPLODE;
             collide_player = EXPLODE;
             damage = 70;
+        }
+        if(type.equals("explosion")){
+            hitbox_size = LARGE;
+            speed = 20;
+            length = 50;
+            lifetime = 15;
+            affected_gravity = false;
+            collide_terrain = DAMAGE;
+            collide_player = DAMAGE;
+            damage = 15;
         }
 
         velocity_x = (float)Math.cos(angle) * (float)speed;
@@ -113,7 +123,11 @@ class Projectile implements Serializable, Cloneable{
         }
         else if(id.equals("grenade")){
             g2.setColor(Color.CYAN);
-            g2.drawOval(display_x - (px-camx) - (length/2), display_y - (py-camy) - (length/2), length, length);
+            g2.fillOval(display_x - (px-camx) - (length/2), display_y - (py-camy) - (length/2), length, length);
+        }
+        else if(id.equals("explosion")){
+            g2.setColor(Color.ORANGE);
+            g2.fillOval(display_x - (px-camx) - (length/2), display_y - (py-camy) - (length/2), length, length);
         }
         g2.drawLine(display_x - (px-camx), display_y - (py-camy), display_x + (int)(Math.round((Math.cos(face_angle))*length)) - (px-camx), display_y + (int)(Math.round((Math.sin(face_angle))*length)) - (py-camy));
         g2.setStroke(new BasicStroke(1));
@@ -125,10 +139,13 @@ class Projectile implements Serializable, Cloneable{
     public Tile checkMapCollision(Map map){
         Rectangle rect = getHitbox();
         for(Tile tile : map.build_map){
-            if(tile != null){
+            if(tile.deleted != true){
                 if(tile.getHitbox().intersects(rect)){
                     if(collide_terrain == DAMAGE || collide_terrain == EXPLODE){
                         tile.health -= damage;
+                        if(tile.health <= 0){
+                            tile.deleted = true;
+                        }
                     }
                     return tile;
                 }

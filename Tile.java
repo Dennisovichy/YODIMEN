@@ -10,8 +10,9 @@ class Tile implements Serializable, Cloneable{
     public int health = 30;
     private boolean[] collision = {true, true};
     private Rectangle hitbox;
+    public boolean deleted = false;
     
-    public Tile(int x, int y, int type, String sprite_path){
+    public Tile(int x, int y, int type, Color color, int health){
       this.x = x;
       this.y = y;
       this.type = type;

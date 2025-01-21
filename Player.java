@@ -36,6 +36,7 @@ public class Player implements Serializable, Cloneable{
     public boolean red_team;
 
     public int health = 100;
+    public int money = 0;
     public boolean dead = false;
     public int holding_slot = 0;
 
@@ -160,18 +161,21 @@ public class Player implements Serializable, Cloneable{
                 if(!colliding_left){
                     if(tile.getHitbox().intersects(rects[0])){
                         colliding_left = true;
+                        continue;
                         //System.out.println("Left collide");
                     }
                 }
                 if(!colliding_right){
                     if(tile.getHitbox().intersects(rects[1])){
                         colliding_right = true;
+                        continue;
                         //System.out.println("right collide");
                     }
                 }
                 if(!colliding_up){
                     if(tile.getHitbox().intersects(rects[2])){
                         colliding_up = true;
+                        continue;
                         //System.out.println("up collide");
                     }
                 }

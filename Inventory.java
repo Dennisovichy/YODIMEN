@@ -1,6 +1,5 @@
 import java.awt.*;
 import java.io.Serializable;
-import java.util.Arrays;
 
 class Inventory implements Serializable, Cloneable{
     Item[] hotbar = new Item[10];
@@ -15,11 +14,9 @@ class Inventory implements Serializable, Cloneable{
 
     public void swapSlots(int[] slots){
         if(slots[0] != -1 && slots[1] != -1){
-            System.out.println("Bingus");
             Item temp = hotbar[slots[0]];
             hotbar[slots[0]] = hotbar[slots[1]];
             hotbar[slots[1]] = temp;
-            System.out.println(Arrays.toString(hotbar));
         }
     }
 

@@ -1,4 +1,5 @@
 -Need to make the whole game now
-1. Improve tile system
-2. Fabricator (building system) 
-3. Match system, way to win
+1. Improve tile system (add shop, add special texture for shop and cores)
+2. Victory screen
+3. More weapons
+4. Improve/make HUD

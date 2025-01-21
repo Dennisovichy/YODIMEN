@@ -238,8 +238,10 @@ class GamePanel extends JPanel implements KeyListener, ActionListener, MouseList
    if(display_info != null){
     for(Projectile proj : display_info.projectiles){
       proj.draw(g, display_info.player_x, display_info.player_y, centerx, centery);
-    }
+    }                
 
+    int draw_posx = 0;
+    int draw_posy = 0;
     for (Tile tile : display_info.game_map) {
       if(tile != null){
         switch (tile.getType()) {
@@ -248,8 +250,12 @@ class GamePanel extends JPanel implements KeyListener, ActionListener, MouseList
           case 3 -> {g.setColor(new Color(0, 0, 255));}
           case 4 -> {g.setColor(new Color(255, 0, 0));}
         }
-        g.fillRect(tile.getX() + (centerx-display_info.player_x), tile.getY() + (centery-display_info.player_y), Map.tilesize, Map.tilesize);
-        g.drawRect(tile.getX() + (centerx-display_info.player_x), tile.getY() + (centery-display_info.player_y), Map.tilesize, Map.tilesize);
+        draw_posx = tile.getX() + (centerx-display_info.player_x);
+        draw_posy = tile.getY() + (centery-display_info.player_y);
+        if((draw_posx + Map.tilesize) > 0 && draw_posx < getWidth() && (draw_posy + Map.tilesize) > 0 && draw_posy < getHeight()){
+          g.fillRect(draw_posx, draw_posy, Map.tilesize, Map.tilesize);
+          g.drawRect(tile.getX() + (centerx-display_info.player_x), tile.getY() + (centery-display_info.player_y), Map.tilesize, Map.tilesize);
+        }
       }
     }
 
@@ -324,6 +330,7 @@ class YodiClient{
             
             socket.setPerformancePreferences(0, 1, 0);
             socket.setTcpNoDelay(true);
+            socket.setSendBufferSize(100000);
             System.out.println("Connected");
  
  
@@ -353,7 +360,7 @@ class YodiClient{
         //InputPacket send = new InputPacket(inputs);
         try{
           out.writeObject(send);
-          out.flush();
+          //out.flush();
           //send_turn = false;
         }
         catch(IOException e){
@@ -431,14 +438,14 @@ class SpamSocket extends Thread{
             }
           }
         }
-        if(make_swapRequest){
+        //if(make_swapRequest){
           ref.sendInfoToServer(this.keys, counter, game.mousex_offset, game.mousey_offset, press_mouse, game.swap_request);
           make_swapRequest = false;
-        }
-        else{
-          int[] temp = {-1, -1};
-          ref.sendInfoToServer(this.keys, counter, game.mousex_offset, game.mousey_offset, press_mouse, temp);
-        }
+        //}
+        //else{
+          //int[] temp = {-1, -1};
+          //ref.sendInfoToServer(this.keys, counter, game.mousex_offset, game.mousey_offset, press_mouse, temp);
+        //}
         //ref.sendInfoToServer(true, false);
     }
   }
