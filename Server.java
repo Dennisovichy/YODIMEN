@@ -153,6 +153,9 @@ class ServerConnection extends JPanel
                                         if(player_inventorys[i].hotbar[player_objects[i].holding_slot].id.equals("drill")){
                                             projectile_list.add(new Projectile(player_objects[i].x, player_objects[i].y, (float)(Math.atan2((float)player_inputs[i].mousey_offset,(float)player_inputs[i].mousex_offset) + Math.PI), "laser", player_objects[i]));
                                         }
+                                        if(player_inventorys[i].hotbar[player_objects[i].holding_slot].id.equals("fabricator")){
+                                            projectile_list.add(new Projectile(player_objects[i].x, player_objects[i].y, (float)(Math.atan2((float)player_inputs[i].mousey_offset,(float)player_inputs[i].mousex_offset) + Math.PI), "grenade", player_objects[i]));
+                                        }
                                         player_inventorys[i].hotbar[player_objects[i].holding_slot].cooldown_counter = 0;
                                         player_inventorys[i].hotbar[player_objects[i].holding_slot].uses_counter++;
                                     }
@@ -194,7 +197,7 @@ class ServerConnection extends JPanel
                 deleting_projectiles = false;
                 delete_projectiles.clear();
                //draw
-               repaint();
+               //repaint();
                
             }
         };
@@ -296,7 +299,7 @@ class ServerConnection extends JPanel
                 sendy[i] = (Player)player_objects[i].clone();
                 }
                 catch(Exception e){
-
+                    System.out.println("299:" + e);
                 }
                 }
             }
@@ -306,7 +309,8 @@ class ServerConnection extends JPanel
             for(int i = 0; i < map.build_map.size(); i++){
                 try {
                     cendy[i] = (Tile)map.build_map.get(i).clone();
-                } catch (CloneNotSupportedException e) {
+                } catch (Exception e) {
+                    System.out.println("310:" + e);
                 }
             }
             
@@ -328,7 +332,7 @@ class ServerConnection extends JPanel
                 bendy[i] = (Projectile)projectile_list.get(i).clone();
                 }
                 catch(Exception e){
-
+                    System.out.println("332:" + e);
                 }
             }
             
@@ -344,23 +348,20 @@ class ServerConnection extends JPanel
                 }
             }
             catch(Exception e){
-
+                System.out.println("348:" + e);
             }
 
-            try {
-                try{
-                outputs[id].writeObject(send);
-                outputs[id].flush();
-                }
-                catch(ConcurrentModificationException p){
-                    System.out.println("End times");
-                }
+            
+            try{
+            outputs[id].writeObject(send);
+            outputs[id].flush();
+            }
+            catch(Exception e){
+                System.out.println("357:" + e);
+            }
             
                 //send_turn[id] = false;
-            } 
-            catch(IOException e){
-                System.out.println(e);
-            }
+            
         }
     }
 }

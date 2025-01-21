@@ -35,6 +35,12 @@ class Item implements Serializable{
             reload_cooldown = 0;
             total_usetimes = -1;
         }
+        if(name.equals("fabricator")){
+            cooldown = 150;
+            use_times = 1;
+            reload_cooldown = 300;
+            total_usetimes = -1;
+        }
     }
 
     public void update(){

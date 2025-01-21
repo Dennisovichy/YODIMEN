@@ -44,6 +44,9 @@ class GameP extends JPanel implements KeyListener, ActionListener, MouseListener
  int camx = 0;
  int camy = 0;
 
+ Color color = Color.BLACK;
+ int health = 1;
+
  boolean holding_left = false;
  boolean holding_right = false;
 
@@ -90,6 +93,14 @@ class GameP extends JPanel implements KeyListener, ActionListener, MouseListener
     }
     if(keys[KeyEvent.VK_D]){
       camx += 15;
+    }
+    if(keys[KeyEvent.VK_C]){
+      color = JColorChooser.showDialog(null, "Choose a color", Color.RED);
+      keys[KeyEvent.VK_C] = false;
+    }
+    if(keys[KeyEvent.VK_H]){
+      health = Integer.parseInt(JOptionPane.showInputDialog("Enter health"));
+      keys[KeyEvent.VK_H] = false;
     }
 
     if(holding_left){
@@ -216,6 +227,10 @@ class GameP extends JPanel implements KeyListener, ActionListener, MouseListener
   switch (e.getButton()) {
       case MouseEvent.BUTTON1 -> {// left click (add tile)
         holding_left = true;
+      }
+
+      case MouseEvent.BUTTON2 -> {
+        System.out.println((mousex + camx) + "," + (mousey + camy));
       }
 
       case MouseEvent.BUTTON3 -> {// right click (remove tile)

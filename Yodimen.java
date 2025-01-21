@@ -59,7 +59,10 @@ class GamePanel extends JPanel implements KeyListener, ActionListener, MouseList
  
   keys = new boolean[KeyEvent.KEY_LAST+1]; 
   //127.0.0.1 local host
-  setPreferredSize(new Dimension(800, 780));
+  //setPreferredSize(new Dimension(800, 780));
+  Rectangle screen = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
+  setPreferredSize(new Dimension(screen.width, screen.height));
+  setLocation(0,0);
   setFocusable(true);
   requestFocus();
   addKeyListener(this);
@@ -149,8 +152,15 @@ class GamePanel extends JPanel implements KeyListener, ActionListener, MouseList
     menu.checkScreen(mousex, mousey);
     if(menu.current_screen.game){
       //String address = "127.0.0.1";
-      String address = JOptionPane.showInputDialog("Enter server address");
-      int port = Integer.parseInt(JOptionPane.showInputDialog("Enter port number"));
+      String address = "";
+      int port = 0;
+      try{
+        address = JOptionPane.showInputDialog("Enter server address");
+        port = Integer.parseInt(JOptionPane.showInputDialog("Enter port number"));
+      }
+      catch(Exception d){
+
+      }
       try {
           Socket test = new Socket(address, port);
           client = new YodiClient(test);
@@ -219,7 +229,7 @@ class GamePanel extends JPanel implements KeyListener, ActionListener, MouseList
  public void paint(Graphics g){
   if(screen == INTRO || screen == CHOOSE){
      g.setColor(Color.WHITE);
-     g.fillRect(0,0, 1500, 1500);
+     g.fillRect(0,0, getWidth(), getHeight());
      menu.drawScreen(g);
   }
   else if(screen == GAME){

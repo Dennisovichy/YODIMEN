@@ -45,7 +45,7 @@ class Map implements Serializable, Cloneable{
     ArrayList<Integer> delete_tiles = new ArrayList<>();
     for(int i = 0; i < build_map.size(); i++){
       if(build_map.get(i).health <= 0){
-        System.out.println(build_map.get(i).health);
+        //System.out.println(build_map.get(i).health);
         delete_tiles.add(i);
       }
     }

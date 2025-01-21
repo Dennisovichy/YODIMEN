@@ -38,9 +38,9 @@ class Projectile implements Serializable, Cloneable{
 
         if(type.equals("bullet_small")){
             hitbox_size = SMALL;
-            speed = 10;
+            speed = 20;
             length = 50;
-            lifetime = -1;
+            lifetime = 2000;
             affected_gravity = false;
             collide_terrain = FIZZLE;
             collide_player = DAMAGE;
@@ -55,6 +55,16 @@ class Projectile implements Serializable, Cloneable{
             collide_terrain = DAMAGE;
             collide_player = FIZZLE;
             damage = 7;
+        }
+        if(type.equals("grenade")){
+            hitbox_size = MEDIUM;
+            speed = 10;
+            length = 8;
+            lifetime = 2000;
+            affected_gravity = true;
+            collide_terrain = EXPLODE;
+            collide_player = EXPLODE;
+            damage = 70;
         }
 
         velocity_x = (float)Math.cos(angle) * (float)speed;
@@ -79,6 +89,9 @@ class Projectile implements Serializable, Cloneable{
         if(lifetime > 0){
             lifetime -= 1;
         }
+        if(affected_gravity){
+            velocity_y += 0.1;
+        }
     }
 
     public void draw(Graphics g){
@@ -98,6 +111,10 @@ class Projectile implements Serializable, Cloneable{
             g2.setStroke(new BasicStroke(7));
             g2.setColor(Color.RED);
         }
+        else if(id.equals("grenade")){
+            g2.setColor(Color.CYAN);
+            g2.drawOval(display_x - (px-camx) - (length/2), display_y - (py-camy) - (length/2), length, length);
+        }
         g2.drawLine(display_x - (px-camx), display_y - (py-camy), display_x + (int)(Math.round((Math.cos(face_angle))*length)) - (px-camx), display_y + (int)(Math.round((Math.sin(face_angle))*length)) - (py-camy));
         g2.setStroke(new BasicStroke(1));
         Rectangle rec = getHitbox();
@@ -110,7 +127,7 @@ class Projectile implements Serializable, Cloneable{
         for(Tile tile : map.build_map){
             if(tile != null){
                 if(tile.getHitbox().intersects(rect)){
-                    if(collide_terrain == DAMAGE){
+                    if(collide_terrain == DAMAGE || collide_terrain == EXPLODE){
                         tile.health -= damage;
                     }
                     return tile;
@@ -125,7 +142,7 @@ class Projectile implements Serializable, Cloneable{
             if(check != null){
                 if(!check.equals(firer)){
                     if(check.getHitbox().intersects(getHitbox())){
-                        if(collide_player == DAMAGE){
+                        if(collide_player == DAMAGE || collide_terrain == EXPLODE){
                             check.health -= damage;
                         }
                         return check;
