@@ -80,32 +80,47 @@ class GameP extends JPanel implements KeyListener, ActionListener, MouseListener
   }
   else if(screen == GAME){
     if(keys[KeyEvent.VK_W]){
-      camy -= 40;
+      camy -= 15;
     }
     if(keys[KeyEvent.VK_S]){
-      camy += 40;
+      camy += 15;
     }
     if(keys[KeyEvent.VK_A]){
-      camx -= 40;
+      camx -= 15;
     }
     if(keys[KeyEvent.VK_D]){
-      camx += 40;
+      camx += 15;
     }
 
     if(holding_left){
       boolean occupied = false;// flag to check if this space already has a tile
         for (Tile tile : this.map.build_map){
-          if (tile.pointCollision(mousex + camx, mousey + camy)){// check if the mouse is colliding with any of the tiles to avoid two tiles inhabiting the same space
+          if (tile.getHitbox().contains(mousex + camx, mousey + camy)){// check if the mouse is colliding with any of the tiles to avoid two tiles inhabiting the same space
             occupied = true;
+            
           }
         }
         if (!occupied){// no prexisting tile in this space
-          this.map.build_map.add(new Tile(mousex - ((mousex + (0 - camx)) % Map.tilesize) + camx, mousey - ((mousey + (0 - camy)) % Map.tilesize) + camy, this.selected_type, ""));// adding a new tile at the mouse if there is no preexisting tile
+          int posx = 0;
+          int posy = 0;
+          if((mousex + camx) > 0){
+            posx = ((mousex + camx) / Map.tilesize);
+          }
+          else{
+            posx = ((mousex + camx) / Map.tilesize) - 1;
+          }
+          if((mousey + camy) > 0){
+            posy = ((mousey + camy) / Map.tilesize);
+          }
+          else{
+            posy = ((mousey + camy) / Map.tilesize) - 1;
+          }
+          this.map.build_map.add(new Tile((posx) * Map.tilesize, (posy) * Map.tilesize, this.selected_type, ""));// adding a new tile at the mouse if there is no preexisting tile
         }
     }
     if(holding_right){
       for (int i = this.map.build_map.size() - 1; i >= 0; i --){
-          if (this.map.build_map.get(i).pointCollision(mousex + camx, mousey + camy)){// check if the mouse is colliding with any of the tiles
+          if (this.map.build_map.get(i).getHitbox().contains(mousex + camx, mousey + camy)){// check if the mouse is colliding with any of the tiles
             this.map.build_map.remove(this.map.build_map.get(i));// remove this tile
           }
         }
@@ -247,7 +262,7 @@ class GameP extends JPanel implements KeyListener, ActionListener, MouseListener
               case 3 -> {g.setColor(new Color(0, 0, 255));}
               case 4 -> {g.setColor(new Color(255, 0, 0));}
             }
-            g.fillRect(tile.getX() + (0 - camx), tile.getY() + (0 - camy), Map.tilesize, Map.tilesize);
+            g.fillRect(tile.getX() - camx, tile.getY() - camy, Map.tilesize, Map.tilesize);
         }
       }
     }

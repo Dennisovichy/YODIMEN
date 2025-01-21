@@ -1,4 +1,4 @@
 -Need to make the whole game now
-1. More types of weapons (and projectiles)
-2. More types of tiles
-3.
+1. Improve tile system
+2. Fabricator (building system) 
+3. Match system, way to win
