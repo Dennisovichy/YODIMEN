@@ -1,4 +1,5 @@
 // A Java program for a Client
+//THIS FILE IS COMPLETELY DEPRECATEED AND USELESS
 import java.io.*;
 import java.net.*;
  

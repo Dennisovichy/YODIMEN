@@ -1,9 +1,10 @@
+//CLASS THAT IS SENT OVER THE NETWORK SERIALIZED TO EASILY CONVEY DISPLAY INFO TO CLIENTS
 import java.io.*;
 
 public class DisplayPacket implements Serializable{
-  int player_x;
+  int player_x; //camera position
   int player_y;
-  Tile[] game_map;
+  Tile[] game_map; //self explanatory
   Player[] players;
   Inventory inventory;
   Projectile[] projectiles;

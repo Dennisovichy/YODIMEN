@@ -1,6 +1,7 @@
+//THIS CLASS IS AALMOST COMPLETELY USELESS, BUT MANAGES THE STARTING MENU FOR THE CLIENT
 import java.awt.*;
 import java.util.*;
-
+//this code is so bad and useless. but was used anyway.
 public class Menu{
     Screen current_screen;
     Screen previous_screen;
@@ -10,8 +11,8 @@ public class Menu{
     Screen red_team = new Screen(false);
 
 
-    public Menu(){
-        Button play = new Button(20, 20, 100, 100, "pound");
+    public Menu(){ //starting menu of the client
+        Button play = new Button(20, 20, 100, 100, "Play");
         Button red = new Button(20, 20, 100, 100, "RED");
         Button blue = new Button(120, 20, 100, 100, "BLUE");
         play.leadToScreen(choose_team);
@@ -48,6 +49,7 @@ class Button{
     int posy;
     int width;
     int height;
+    
 
     String text;
 
@@ -74,6 +76,7 @@ class Button{
 class Screen{
     boolean game;
     ArrayList<Button> buttons = new ArrayList<>();
+    Font score_font = new Font("Consolas", Font.PLAIN, 30);
 
     public Screen(boolean game){
         this.game = game;
@@ -98,6 +101,7 @@ class Screen{
         g.setColor(Color.BLACK);
         for(Button butter: buttons){
             g.drawRect(butter.posx, butter.posy, butter.width, butter.height);
+            g.drawString(butter.text, butter.posx, butter.posy);
         }
     }
 }

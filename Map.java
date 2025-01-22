@@ -1,9 +1,10 @@
+//CLASS THAT STORES AND UPDATES ALL OF THE TILES IN THE GAME
 import java.awt.*;
 import java.io.Serializable;
 import java.util.*;
 
 class Map implements Serializable, Cloneable{
-  public ArrayList<Tile> build_map = new ArrayList<>();
+  public ArrayList<Tile> build_map = new ArrayList<>(); //store all of the map tiles
   static int tilesize = 40;
   
   int default_camx = 300;
@@ -14,9 +15,10 @@ class Map implements Serializable, Cloneable{
     
   }
   
-  public void draw(Graphics g){// server
+  public void draw(Graphics g){// server (USELESS)
     for (Tile tile : build_map) {
       switch (tile.getType()) {
+        case 0 -> {g.setColor(new Color(0, 0, 255));}
         case 1 -> {g.setColor(new Color(255, 0, 255));}
         case 2 -> {g.setColor(new Color(255, 255, 0));}
         case 3 -> {g.setColor(new Color(0, 0, 255));}
@@ -27,7 +29,7 @@ class Map implements Serializable, Cloneable{
     }
   }
 
-  public void draw(Graphics g, int px, int py, int camx, int camy){// client
+  public void draw(Graphics g, int px, int py, int camx, int camy){// client (USELESS)
     for (Tile tile : build_map) {
       switch (tile.getType()) {
         case 1 -> {g.setColor(new Color(255, 0, 255));}
@@ -41,7 +43,7 @@ class Map implements Serializable, Cloneable{
   }
 
 
-  public void update(){
+  public void update(){ //determine if tile should be destroyed or not, remove destroyed tiles
     ArrayList<Integer> delete_tiles = new ArrayList<>();
     for(int i = 0; i < build_map.size(); i++){
       if(build_map.get(i).health <= 0){

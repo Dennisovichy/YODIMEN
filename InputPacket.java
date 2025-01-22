@@ -1,15 +1,16 @@
+//CLASS THAT IS SENT OVER THE NETWORK SERIALIZED TO CONVEY INPUTS FROM CLIENT TO SERVER
 import java.awt.event.*;
 import java.io.*;
 
 public class InputPacket implements Serializable{
-  boolean[] keys = new boolean[KeyEvent.KEY_LAST + 1];
+  boolean[] keys = new boolean[KeyEvent.KEY_LAST + 1]; //self explanatory
   long frame = 0;
   int mousex_offset = 0;
   int mousey_offset = 0;
   boolean mouse_pressed = false;
   int[] inventory_swap_request;
 
-  boolean red_team = false;
+  boolean red_team = false; //team select information
   boolean decision_made = false;
 
   public InputPacket(boolean[] inputs, long counter, int mousex, int mousey, boolean pressed, int[] inventory_swap){

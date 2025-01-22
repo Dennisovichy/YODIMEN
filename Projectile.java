@@ -1,3 +1,4 @@
+//CLASS THAT REPRESENTS ALL THE DIFFERENT KINDS OF PROJECTILES AND THEIR INTERACTIONS
 import java.awt.*;
 import java.io.Serializable;
 
@@ -6,37 +7,37 @@ class Projectile implements Serializable, Cloneable{
 
     public static final int LARGE = 30, MEDIUM = 16, SMALL = 6; //HITBOX SIZES
 
-    float x;
+    float x; //PROPER POS
     float y;
-    int display_x;
+    int display_x; //DISPLAY POS
     int display_y;
-    float velocity_x;
+    float velocity_x; //VELOCITY 
     float velocity_y;
     float face_angle;
 
-    String id;
+    String id; //NAME OF PROJECTILE
 
-    int hitbox_size;
-    int length;
-    int collide_terrain;
-    int collide_player;
-    int damage;
-    int lifetime;
-    Player firer;
+    int hitbox_size; //SIZE OF HITBOX
+    int length; //SIZE OF DRAWN THING
+    int collide_terrain; //BEHAVIOR WHEN IMPACT TERRAIN
+    int collide_player; //BEHAVIOR WHEN IMPACT PLAYERS
+    int damage; //DAMAGE
+    int lifetime; ///LIFETIME OF PROJECTILE (WHEN DESPAWNS)
+    Player firer; //PERSON WHO FIRED IT (PREVENT SHOOTING YOURSELF)
 
-    Image sprite;
+    Image sprite; //USELESS
 
-    boolean affected_gravity;
+    boolean affected_gravity; //DOES THE PROJECTILE DROP DUE TO GRAVITY
 
     public Projectile(int startx, int starty, float angle, String type, Player fire){
-        int speed = 7;
+        int speed = 7; 
         x = startx;
         y = starty;
         face_angle = angle;
         firer = fire;
         id = type;
 
-        if(type.equals("bullet_small")){
+        if(type.equals("bullet_small")){ //ALLOCATE THE PROPER STATS DEPENDING ON WEAPON NAME
             hitbox_size = SMALL;
             speed = 20;
             length = 50;
@@ -77,21 +78,21 @@ class Projectile implements Serializable, Cloneable{
             damage = 15;
         }
 
-        velocity_x = (float)Math.cos(angle) * (float)speed;
+        velocity_x = (float)Math.cos(angle) * (float)speed; //CALCULATE VELOCITY
         velocity_y = (float)Math.sin(angle) * (float)speed;
     }
 
     @Override
-    public Object clone() throws CloneNotSupportedException{
+    public Object clone() throws CloneNotSupportedException{ //CLONING
         Projectile temp = (Projectile)super.clone();
         return temp;
     }
 
-    public Rectangle getHitbox(){
+    public Rectangle getHitbox(){ //HITBOX
         return new Rectangle(display_x - (hitbox_size/2), display_y - (hitbox_size/2), hitbox_size, hitbox_size);
     }
 
-    public void update(){
+    public void update(){ //UPDATE THE POSITION AND LIFETIME AND IF GRAVITY VELOCITY GO DOWN
         x = x + velocity_x;
         y = y + velocity_y;
         display_x = Math.round(x);
@@ -104,7 +105,7 @@ class Projectile implements Serializable, Cloneable{
         }
     }
 
-    public void draw(Graphics g){
+    public void draw(Graphics g){ //SERVERSIDE USELESS
         g.setColor(Color.CYAN);
         g.drawLine(display_x, display_y, display_x + (int)(Math.round((Math.cos(face_angle))*200.0)), display_y + (int)(Math.round((Math.sin(face_angle))*200.0)));
         Rectangle rec = getHitbox();
@@ -113,7 +114,7 @@ class Projectile implements Serializable, Cloneable{
 
     public void draw(Graphics g, int px, int py, int camx, int camy){
         Graphics2D g2 = (Graphics2D) g;
-        if(id.equals("bullet_small")){
+        if(id.equals("bullet_small")){ //DRAW THE PROJECTILE BASED ON WHAT TYPE IT IS
             g2.setStroke(new BasicStroke(3));
             g2.setColor(Color.YELLOW);
         }
@@ -136,7 +137,7 @@ class Projectile implements Serializable, Cloneable{
         
     }
 
-    public Tile checkMapCollision(Map map){
+    public Tile checkMapCollision(Map map){ //CHECK IF PROJECTILE HAS HIT MAP, DO DAMAGE TO IT IF IT CAN
         Rectangle rect = getHitbox();
         for(Tile tile : map.build_map){
             if(tile.deleted != true){
@@ -154,7 +155,7 @@ class Projectile implements Serializable, Cloneable{
         return null;
     }
 
-    public Player checkPlayerCollision(Player[] players){
+    public Player checkPlayerCollision(Player[] players){ //CHECK IF PROJECTILE HIT PLAYER, DO DAMAGE TO PLAYER IF YES. DON'T DAMAGE IF HIT ORIGINAL SHOOTER
         for(Player check: players){
             if(check != null){
                 if(!check.equals(firer)){

@@ -1,14 +1,14 @@
-
+//CLASS THAT MANAGES THE GENERAL STATE OF THE GAME, RESPAWNS AND VICTORY CONDITIONS
 class Match{
-    int respawn_time = 100;
+    int respawn_time = 100; //self explanatory
     int[] bluespawn = new int[2];
     int[] redspawn = new int[2];
     Player[] players;
     int[] respawn_queues = {0,0,0,0};
 
-    int[] bluecorepos;
+    int[] bluecorepos; //position of the primary objectives
     int[] redcorepos;
-    boolean bluevictory = false;
+    boolean bluevictory = false; //see if teams have won or not
     boolean redvictory = false;
 
     Map ref;
@@ -22,7 +22,7 @@ class Match{
         ref = map;
     }
 
-    public String checkVictory(Map map){
+    public String checkVictory(Map map){ //check if team has won by checking if the other team's shop still exists in the map
         boolean blue_dead = true;
         boolean red_dead = true;
         for(Tile tile: map.build_map){
@@ -42,9 +42,10 @@ class Match{
         return "null";
     }
 
-    public void update(Map map){
+    public void update(Map map){ //update respawn queues, also check if victory was achieved
         for(int i = 0; i < players.length; i++){
             if(players[i] != null){
+                players[i].victor = checkVictory(map); //victory boolean is stored in players which is sent over in display packet
                 if(players[i].dead){
                     if(respawn_queues[i] < respawn_time){
                         respawn_queues[i] += 1;
@@ -64,13 +65,6 @@ class Match{
                     }
                 }
             }
-        }
-        String check = checkVictory(map);
-        if(check.equals("blue")){
-            System.out.println("Blue victory");
-        }
-        if(check.equals("red")){
-            System.out.println("Red victory");
         }
     }
 

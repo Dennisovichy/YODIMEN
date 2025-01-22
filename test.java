@@ -1,3 +1,5 @@
+//MAPMAKER FOR THE GAME, DONT WONDER WHY ITS CALLED TEST.JAVA
+
 import java.awt.*;
 import java.awt.event.*;
 import java.io.FileInputStream;
@@ -127,7 +129,7 @@ class GameP extends JPanel implements KeyListener, ActionListener, MouseListener
           else{
             posy = ((mousey + camy) / Map.tilesize) - 1;
           }
-          this.map.build_map.add(new Tile((posx) * Map.tilesize, (posy) * Map.tilesize, this.selected_type, null, health));// adding a new tile at the mouse if there is no preexisting tile
+          this.map.build_map.add(new Tile((posx) * Map.tilesize, (posy) * Map.tilesize, this.selected_type, color, health));// adding a new tile at the mouse if there is no preexisting tile
         }
     }
     if(holding_right){
@@ -201,8 +203,8 @@ class GameP extends JPanel implements KeyListener, ActionListener, MouseListener
   //client.sendInfoToServer(keys);
   int key = ke.getKeyCode();
   switch (key) {
-    case KeyEvent.VK_1 -> {this.selected_type = 1;}
-    case KeyEvent.VK_2 -> {this.selected_type = 2;}
+    case KeyEvent.VK_1 -> {this.selected_type = 0;}
+    case KeyEvent.VK_2 -> {this.selected_type = 1;}
     case KeyEvent.VK_3 -> {this.selected_type = 3;}
     case KeyEvent.VK_4 -> {this.selected_type = 4;}
     case KeyEvent.VK_0 -> {save(); System.out.println("save");}
@@ -272,13 +274,11 @@ class GameP extends JPanel implements KeyListener, ActionListener, MouseListener
         g.setColor(Color.YELLOW);
         g.fillRect(300 + (0 - camx), 420 + (0 - camy), Map.tilesize, Map.tilesize);
         for (Tile tile : this.map.build_map) {
-            switch (tile.getType()) {
-              case 1 -> {g.setColor(new Color(255, 0, 255));}
-              case 2 -> {g.setColor(new Color(255, 255, 0));}
-              case 3 -> {g.setColor(new Color(0, 0, 255));}
-              case 4 -> {g.setColor(new Color(255, 0, 0));}
-            }
-            g.fillRect(tile.getX() - camx, tile.getY() - camy, Map.tilesize, Map.tilesize);
+            
+              tile.draw(g, camx, camy, 0, 0);
+              
+            
+            //g.fillRect(tile.getX() - camx, tile.getY() - camy, Map.tilesize, Map.tilesize);
         }
       }
     }
