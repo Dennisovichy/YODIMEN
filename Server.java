@@ -76,7 +76,9 @@ class ServerConnection extends JPanel
             }
             can_pressAgain.add(hemp);
         }
-        setPreferredSize(new Dimension(screenwidth, screenheight)); //FILL THE ENTIRE SCREEN
+        //setPreferredSize(new Dimension(screenwidth, screenheight)); //FILL THE ENTIRE SCREEN
+        Rectangle screen = GraphicsEnvironment.getLocalGraphicsEnvironment().getMaximumWindowBounds();
+        setPreferredSize(new Dimension(screen.width, screen.height));
         //setFocusable(true);
         // starts server and waits for a connection
         try
@@ -276,7 +278,7 @@ class ServerConnection extends JPanel
                 
                 delete_projectiles.clear(); 
                //draw
-               //repaint();
+               repaint();
                
             }
         };
@@ -298,7 +300,7 @@ class ServerConnection extends JPanel
     @Override
     public void paint(Graphics g){ //ANTIQUATED
         g.setColor(new Color(255,255,255));
-        g.fillRect(0, 0, 1000, 1000);
+        g.fillRect(0, 0, 10000, 10000);
         for(Projectile bullet: projectile_list){
             bullet.draw(g);
         }

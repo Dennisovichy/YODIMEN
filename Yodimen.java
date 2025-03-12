@@ -69,7 +69,7 @@ class GamePanel extends JPanel implements KeyListener, ActionListener, MouseList
   requestFocus();
   addKeyListener(this);
   addMouseListener(this);
-  timer = new javax.swing.Timer(10, this);
+  timer = new javax.swing.Timer(1, this);
   timer.start();
  }
 
